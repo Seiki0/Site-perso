@@ -1964,6 +1964,44 @@ button:focus-visible {
   color: var(--primary);
 }
 
+.sidebar-empty-message {
+  padding: 5px 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.sidebar-favorite-file {
+  width: 100%;
+  min-height: 38px;
+  padding: 7px 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  gap: 9px;
+}
+
+.sidebar-favorite-file > .ui-icon {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  color: var(--primary);
+}
+
+.sidebar-favorite-file > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-favorite-file:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
 .note-pin-icon { width: 13px; height: 13px; margin-right: 4px; color: #eab308; vertical-align: -1px; }
 .sidebar-sub-item .sub-icon { width: 14px; height: 14px; color: var(--primary); }
 .status-spinner { animation: icon-spin 1s linear infinite; }
@@ -2625,6 +2663,29 @@ button:focus-visible {
   }
   .file-card { padding: 12px 10px; }
   .file-actions { gap: 3px; }
+}
+
+body.note-fullscreen-active {
+  overflow: hidden;
+}
+
+.note-editor-wrapper.fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  max-height: 100dvh;
+  border-radius: 0;
+}
+
+.note-editor-wrapper.fullscreen .editor-body-container,
+.note-editor-wrapper.fullscreen .note-textarea,
+.note-editor-wrapper.fullscreen .markdown-preview {
+  min-height: 0;
   .btn-file-action { width: 28px; min-width: 28px; height: 28px; padding: 5px; }
 }
 

@@ -49,6 +49,8 @@
     <symbol id="ui-icon-design" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18h1.5a2.5 2.5 0 0 0 1.7-4.3 1.5 1.5 0 0 1 1-2.7H18a3 3 0 0 0 3-3c0-4.4-4-8-9-8z"></path><circle cx="7.5" cy="10" r="1"></circle><circle cx="11" cy="7.5" r="1"></circle><circle cx="15" cy="9" r="1"></circle></symbol>
     <symbol id="ui-icon-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 10h18M9 4v16m6-16v16"></path></symbol>
     <symbol id="ui-icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></symbol>
+    <symbol id="ui-icon-maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3"></path></symbol>
+    <symbol id="ui-icon-minimize" viewBox="0 0 24 24"><path d="M8 3v5H3m13-5v5h5M3 16h5v5m13-5h-5v5"></path></symbol>
   </svg>
 
   <div class="global-drop-overlay" id="globalDropOverlay">
@@ -114,6 +116,12 @@
           <div class="sidebar-section-title">Notes épinglées</div>
           <div id="sidebarFavoritesList">
             <div style="font-size:12px;color:var(--text-muted);padding:4px 12px;">Aucune note épinglée</div>
+          </div>
+        </div>
+        <div>
+          <div class="sidebar-section-title">Fichiers favoris</div>
+          <div id="sidebarFavoriteFilesList">
+            <div class="sidebar-empty-message">Aucun fichier favori</div>
           </div>
         </div>
         <div>
@@ -183,6 +191,7 @@
                 <input type="text" class="note-title-input" id="noteTitleInput" placeholder="Titre de la note..." maxlength="80" title="Maximum 80 caractères" oninput="onNoteTitleChange()">
                 <div style="display:flex;align-items:center;gap:8px;">
                   <button class="btn-card-action" id="pinActiveNoteBtn" onclick="togglePinActiveNote()" title="Épingler" aria-label="Épingler" style="font-size:15px;padding:3px 6px;"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-pin"></use></svg></button>
+                  <button type="button" class="btn-card-action" id="noteFullscreenBtn" onclick="toggleNoteFullscreen()" title="Plein écran" aria-label="Passer la note en plein écran" aria-pressed="false"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-maximize"></use></svg></button>
                   <div class="save-status-container">
                     <span class="save-status-icon" id="saveStatusIcon"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-check"></use></svg></span>
                     <span id="saveStatusText">Enregistré</span>
@@ -371,6 +380,7 @@
        NAVIGATION & TIROIR MOBILE
        ========================================================================= */
     function switchMainTab(tabName) {
+      if (tabName !== 'notes') quitterPleinEcranNote();
       activeMainTab = tabName;
       document.getElementById('navItemNotes').classList.toggle('active', tabName === 'notes');
       document.getElementById('navItemFiles').classList.toggle('active', tabName === 'files');
@@ -670,6 +680,31 @@
       btn.style.color = isPinned ? '#eab308' : 'var(--text-muted)';
     }
 
+    function toggleNoteFullscreen() {
+      const editor = document.getElementById('noteEditorWrapper');
+      const isFullscreen = editor.classList.toggle('fullscreen');
+      document.body.classList.toggle('note-fullscreen-active', isFullscreen);
+
+      const button = document.getElementById('noteFullscreenBtn');
+      button.setAttribute('aria-pressed', String(isFullscreen));
+      button.setAttribute('aria-label', isFullscreen ? 'Quitter le plein écran' : 'Passer la note en plein écran');
+      button.title = isFullscreen ? 'Quitter le plein écran' : 'Plein écran';
+      button.innerHTML = renderUiIcon(isFullscreen ? 'minimize' : 'maximize');
+    }
+
+    function quitterPleinEcranNote() {
+      const editor = document.getElementById('noteEditorWrapper');
+      if (!editor.classList.contains('fullscreen')) return;
+      editor.classList.remove('fullscreen');
+      document.body.classList.remove('note-fullscreen-active');
+
+      const button = document.getElementById('noteFullscreenBtn');
+      button.setAttribute('aria-pressed', 'false');
+      button.setAttribute('aria-label', 'Passer la note en plein écran');
+      button.title = 'Plein écran';
+      button.innerHTML = renderUiIcon('maximize');
+    }
+
     function onNoteSearch(val) {
       afficherListeNotes(val);
     }
@@ -690,6 +725,7 @@
 
     function fermerEditeurMobile() {
       sauvegarderNoteImmediate();
+      quitterPleinEcranNote();
       document.getElementById('noteEditorWrapper').classList.remove('mobile-active');
     }
 
@@ -1136,13 +1172,58 @@
         (data || []).forEach(row => sharedFavoriteFileKeys.add(row.file_key));
         sharedFavoritesLoaded = true;
         document.getElementById('sharedFavoritesNotice').hidden = true;
+        mettreAJourFavorisFichiersSidebar();
         afficherFichiers();
       } catch (err) {
         sharedFavoritesLoaded = false;
         console.error('Erreur chargement des favoris de fichiers:', err);
         afficherNoticeFavorisPartages();
+        mettreAJourFavorisFichiersSidebar();
         afficherFichiers();
       }
+    }
+
+    function mettreAJourFavorisFichiersSidebar() {
+      const container = document.getElementById('sidebarFavoriteFilesList');
+      if (!container) return;
+
+      const favoriteFiles = storedFiles.filter(file => sharedFavoriteFileKeys.has(file.name));
+      if (favoriteFiles.length === 0) {
+        container.innerHTML = '<div class="sidebar-empty-message">Aucun fichier favori</div>';
+        return;
+      }
+
+      container.innerHTML = favoriteFiles.map(file => {
+        const name = decodeStorageKey(file.name);
+        return `
+          <button type="button" class="sidebar-sub-item sidebar-favorite-file"
+                  onclick="ouvrirFavoriFichier('${escapeHtml(file.name)}')"
+                  title="${escapeHtml(name)}">
+            ${getFileIcon(name)}
+            <span>${escapeHtml(name)}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function ouvrirFavoriFichier(fileKey) {
+      const fileIndex = storedFiles.findIndex(file => file.name === fileKey);
+      if (fileIndex < 0) {
+        chargerFichiers();
+        return;
+      }
+
+      switchMainTab('files');
+      filtrerFichiersParCategorie('all');
+      selectedFileIdx = fileIndex;
+      afficherFichiers();
+      requestAnimationFrame(() => {
+        const fileCard = document.getElementById(`fileCard-${fileIndex}`);
+        if (fileCard) {
+          fileCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          fileCard.focus({ preventScroll: true });
+        }
+      });
     }
 
     function afficherNoticeFavorisPartages() {
@@ -1173,6 +1254,7 @@
         if (error) throw error;
         storedFiles = (data || []).filter(f => f.name !== '.emptyFolderPlaceholder');
         await chargerFavorisFichiers();
+        mettreAJourFavorisFichiersSidebar();
         document.getElementById('sidebarFilesCount').textContent = storedFiles.length;
         document.getElementById('filesCountBadge').textContent = `${storedFiles.length} fichier${storedFiles.length > 1 ? 's' : ''}`;
         afficherFichiers();
@@ -1206,10 +1288,15 @@
 
     function afficherFichiers() {
       const container = document.getElementById('filesListContainer');
-      let filesToDisplay = storedFiles;
+      const filesTriees = [...storedFiles].sort((a, b) => {
+        const aFavorite = sharedFavoriteFileKeys.has(a.name) ? 1 : 0;
+        const bFavorite = sharedFavoriteFileKeys.has(b.name) ? 1 : 0;
+        return bFavorite - aFavorite;
+      });
+      let filesToDisplay = filesTriees;
 
       if (activeFileFilter === 'favorites') {
-        filesToDisplay = storedFiles.filter(file => sharedFavoriteFileKeys.has(file.name));
+        filesToDisplay = filesTriees.filter(file => sharedFavoriteFileKeys.has(file.name));
       } else if (activeFileFilter !== 'all') {
         const extensionsMap = {
           image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
@@ -1217,7 +1304,7 @@
           archive: ['zip', 'rar', '7z', 'tar', 'gz']
         };
         const allowedExts = extensionsMap[activeFileFilter] || [];
-        filesToDisplay = storedFiles.filter(f => {
+        filesToDisplay = filesTriees.filter(f => {
           const ext = f.name.includes('.') ? f.name.split('.').pop().toLowerCase() : '';
           return allowedExts.includes(ext);
         });
@@ -1244,6 +1331,7 @@
         return `
           <div class="file-card ${isSelected ? 'selected' : ''}"
                id="fileCard-${realIdx}"
+               tabindex="-1"
                onclick="selectionnerFichier(${realIdx}, event)"
                ondblclick="ouvrirFichierParIndex(${realIdx})"
                draggable="true"
@@ -1287,6 +1375,7 @@
         if (result.error) throw result.error;
         if (isFavorite) sharedFavoriteFileKeys.delete(file.name);
         else sharedFavoriteFileKeys.add(file.name);
+        mettreAJourFavorisFichiersSidebar();
         afficherFichiers();
       } catch (err) {
         console.error('Erreur mise à jour favori de fichier:', err);
@@ -1391,6 +1480,7 @@
       const displayName = decodeStorageKey(fileName);
 
       storedFiles.splice(idx, 1);
+      mettreAJourFavorisFichiersSidebar();
       document.getElementById('sidebarFilesCount').textContent = storedFiles.length;
       document.getElementById('filesCountBadge').textContent = `${storedFiles.length} fichier${storedFiles.length > 1 ? 's' : ''}`;
       if (currentViewerFileIdx === idx) fermerVisualiseur();
@@ -1414,6 +1504,7 @@
           clearTimeout(deleteTimer);
           pendingDeletions.delete(fileName);
           storedFiles.splice(idx, 0, fileObj);
+          mettreAJourFavorisFichiersSidebar();
           document.getElementById('sidebarFilesCount').textContent = storedFiles.length;
           document.getElementById('filesCountBadge').textContent = `${storedFiles.length} fichier${storedFiles.length > 1 ? 's' : ''}`;
           afficherFichiers();
@@ -1628,6 +1719,7 @@
 
         // 5. Échap : Fermer les fenêtres ouvertes
         if (e.key === 'Escape') {
+          quitterPleinEcranNote();
           fermerVisualiseur();
           fermerCommandPalette();
         }
