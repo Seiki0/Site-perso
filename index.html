@@ -113,7 +113,7 @@
           </ul>
         </div>
         <div>
-          <div class="sidebar-section-title">Notes épinglées</div>
+          <div class="sidebar-section-title">Notes favoris</div>
           <div id="sidebarFavoritesList">
             <div style="font-size:12px;color:var(--text-muted);padding:4px 12px;">Aucune note épinglée</div>
           </div>
@@ -336,7 +336,15 @@
     }
 
     if (typeof marked !== 'undefined') {
-      marked.use({ breaks: true, gfm: true });
+  const renderer = new marked.Renderer();
+  
+  // Surcharge du rendu des liens Markdown
+  renderer.link = ({ href, title, text }) => {
+    const titleAttr = title ? `title="${title}"` : '';
+    return `<a href="${href}" ${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
+  };
+
+  marked.use({ breaks: true, gfm: true, renderer });
     }
 
     let notes = [];
