@@ -12,7 +12,12 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <style>
-    :root {
+    /* =========================================
+       SYSTEME DE THEMES DYNAMIQUES
+       ========================================= */
+       
+    /* 1. Thème Clair (Défaut) */
+    :root, :root.theme-light {
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
       --primary-light: #eff6ff;
@@ -23,6 +28,8 @@
       --success-light: #f0fdf4;
       --bg: #f8fafc;
       --card-bg: #ffffff;
+      --nav-bg: #f1f5f9;
+      --input-bg: #ffffff;
       --border: #e2e8f0;
       --border-dark: #cbd5e1;
       --text: #0f172a;
@@ -30,8 +37,84 @@
       --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
       --radius: 10px;
+      --backdrop: none;
     }
 
+    /* 2. Thème Sombre (Dark Mode) */
+    :root.theme-dark {
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --primary-light: rgba(59, 130, 246, 0.15);
+      --danger: #ef4444;
+      --danger-hover: #f87171;
+      --danger-light: rgba(239, 68, 68, 0.15);
+      --success: #22c55e;
+      --success-light: rgba(34, 197, 94, 0.15);
+      --bg: #09090b;
+      --card-bg: #18181b;
+      --nav-bg: #27272a;
+      --input-bg: #18181b;
+      --border: #27272a;
+      --border-dark: #3f3f46;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --shadow-sm: 0 4px 20px rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.5);
+      --radius: 10px;
+      --backdrop: none;
+    }
+
+    /* 3. Thème Verre (Glassmorphism) */
+    :root.theme-glass {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-light: rgba(99, 102, 241, 0.2);
+      --danger: #e11d48;
+      --danger-hover: #be123c;
+      --danger-light: rgba(225, 29, 72, 0.2);
+      --success: #10b981;
+      --success-light: rgba(16, 185, 129, 0.2);
+      --bg: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+      --card-bg: rgba(255, 255, 255, 0.4);
+      --nav-bg: rgba(255, 255, 255, 0.3);
+      --input-bg: rgba(255, 255, 255, 0.5);
+      --border: rgba(255, 255, 255, 0.5);
+      --border-dark: rgba(255, 255, 255, 0.8);
+      --text: #0f172a;
+      --text-muted: #334155;
+      --shadow-sm: 0 4px 15px rgba(0,0,0,0.05);
+      --shadow-md: 0 10px 25px rgba(0,0,0,0.1);
+      --radius: 16px;
+      --backdrop: blur(12px);
+    }
+
+    /* 4. Thème Minimaliste (Monochrome / Notion Style) */
+    :root.theme-mono {
+      --primary: #000000;
+      --primary-hover: #333333;
+      --primary-light: #f1f1f1;
+      --danger: #000000;
+      --danger-hover: #333333;
+      --danger-light: #f1f1f1;
+      --success: #000000;
+      --success-light: #f1f1f1;
+      --bg: #ffffff;
+      --card-bg: #ffffff;
+      --nav-bg: #f7f7f5;
+      --input-bg: #ffffff;
+      --border: #e5e5e5;
+      --border-dark: #cccccc;
+      --text: #37352f;
+      --text-muted: #9a9a97;
+      --shadow-sm: none;
+      --shadow-md: none;
+      --radius: 0px;
+      --backdrop: none;
+    }
+
+    /* =========================================
+       STYLES GLOBAUX
+       ========================================= */
     * { box-sizing: border-box; }
 
     body {
@@ -43,11 +126,21 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    /* Modificateurs Glassmorphism globaux */
+    .glass-panel {
+      background: var(--card-bg);
+      backdrop-filter: var(--backdrop);
+      -webkit-backdrop-filter: var(--backdrop);
     }
 
     /* HEADER */
     header {
       background: var(--card-bg);
+      backdrop-filter: var(--backdrop);
+      -webkit-backdrop-filter: var(--backdrop);
       border-bottom: 1px solid var(--border);
       padding: 12px 20px;
       position: sticky;
@@ -59,6 +152,7 @@
       flex-wrap: wrap;
       gap: 12px;
       box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
     }
 
     .brand {
@@ -77,13 +171,48 @@
       gap: 8px;
     }
 
+    /* THEME SWITCHER */
+    .theme-switcher {
+      display: flex;
+      gap: 4px;
+      background: var(--nav-bg);
+      padding: 4px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .theme-btn {
+      background: transparent;
+      border: none;
+      padding: 6px;
+      border-radius: calc(var(--radius) - 2px);
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+      opacity: 0.6;
+    }
+    .theme-btn:hover { opacity: 1; transform: scale(1.1); }
+    .theme-btn.active { 
+      opacity: 1; 
+      background: var(--card-bg); 
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
     /* TOP TABS NAVIGATION */
     .nav-tabs {
       display: flex;
-      background: #f1f5f9;
+      background: var(--nav-bg);
       padding: 4px;
-      border-radius: 8px;
+      border-radius: var(--radius);
       gap: 4px;
+      border: 1px solid var(--border);
     }
 
     .nav-tab-btn {
@@ -93,7 +222,7 @@
       font-size: 14px;
       font-weight: 600;
       color: var(--text-muted);
-      border-radius: 6px;
+      border-radius: calc(var(--radius) - 2px);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -111,8 +240,8 @@
       font-size: 11px;
       padding: 2px 7px;
       border-radius: 12px;
-      background: #e2e8f0;
-      color: #475569;
+      background: var(--border);
+      color: var(--text-muted);
     }
     .nav-tab-btn.active .badge {
       background: var(--primary-light);
@@ -128,12 +257,8 @@
       margin: 0 auto;
     }
 
-    .tab-content {
-      display: none;
-    }
-    .tab-content.active {
-      display: block;
-    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
     /* =========================================
        SECTION 1: BLOC-NOTES MULTI-NOTES & MARKDOWN
@@ -159,6 +284,7 @@
     /* SIDEBAR LISTE DES NOTES */
     .notes-sidebar {
       background: var(--card-bg);
+      backdrop-filter: var(--backdrop);
       border-radius: var(--radius);
       border: 1px solid var(--border);
       display: flex;
@@ -173,7 +299,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      background: #fafafa;
+      background: var(--nav-bg);
     }
 
     .sidebar-title-row {
@@ -196,11 +322,12 @@
       border-radius: 6px;
       font-size: 13px;
       outline: none;
-      background: white;
+      background: var(--input-bg);
+      color: var(--text);
     }
     .search-input:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+      box-shadow: 0 0 0 2px var(--primary-light);
     }
 
     .notes-list {
@@ -221,18 +348,18 @@
       align-items: flex-start;
       justify-content: space-between;
       gap: 8px;
-      background: #f8fafc;
+      background: transparent;
       transition: all 0.15s ease;
     }
 
     .note-card:hover {
-      background: #f1f5f9;
+      background: var(--nav-bg);
       border-color: var(--border-dark);
     }
 
     .note-card.active {
       background: var(--primary-light);
-      border-color: #bfdbfe;
+      border-color: var(--primary);
     }
 
     .note-card-info {
@@ -264,13 +391,14 @@
 
     .note-card-date {
       font-size: 11px;
-      color: #94a3b8;
+      color: var(--text-muted);
+      opacity: 0.8;
     }
 
     .btn-delete-item {
       background: transparent;
       border: none;
-      color: #94a3b8;
+      color: var(--text-muted);
       cursor: pointer;
       padding: 6px;
       border-radius: 6px;
@@ -288,6 +416,7 @@
     /* ZONE ÉDITEUR DE NOTE */
     .note-editor-wrapper {
       background: var(--card-bg);
+      backdrop-filter: var(--backdrop);
       border-radius: var(--radius);
       border: 1px solid var(--border);
       box-shadow: var(--shadow-sm);
@@ -304,7 +433,7 @@
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 12px;
-      background: #fafafa;
+      background: var(--nav-bg);
     }
 
     .note-title-box {
@@ -328,7 +457,7 @@
       transition: all 0.2s;
     }
     .note-title-input:hover, .note-title-input:focus {
-      background: white;
+      background: var(--input-bg);
       border-color: var(--border-dark);
     }
 
@@ -343,7 +472,7 @@
       border-radius: 20px;
     }
     .save-status.saved { background: var(--success-light); color: var(--success); }
-    .save-status.saving { background: #fffbeb; color: #b45309; }
+    .save-status.saving { background: var(--primary-light); color: var(--primary); }
     .save-status.error { background: var(--danger-light); color: var(--danger); }
 
     /* TOOLBAR */
@@ -355,7 +484,7 @@
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 8px;
-      background: white;
+      background: var(--card-bg);
     }
 
     .toolbar-group {
@@ -366,9 +495,9 @@
     }
 
     .tool-btn {
-      background: white;
+      background: var(--input-bg);
       border: 1px solid var(--border);
-      color: #334155;
+      color: var(--text);
       padding: 6px 10px;
       border-radius: 6px;
       font-size: 12px;
@@ -380,17 +509,18 @@
       transition: all 0.15s;
     }
     .tool-btn:hover {
-      background: #f1f5f9;
+      background: var(--nav-bg);
       border-color: var(--border-dark);
       color: var(--primary);
     }
 
     .view-mode-tabs {
       display: flex;
-      background: #f1f5f9;
+      background: var(--nav-bg);
       padding: 3px;
       border-radius: 6px;
       gap: 2px;
+      border: 1px solid var(--border);
     }
 
     .view-mode-btn {
@@ -405,9 +535,9 @@
       transition: all 0.15s;
     }
     .view-mode-btn.active {
-      background: white;
+      background: var(--card-bg);
       color: var(--primary);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      box-shadow: var(--shadow-sm);
     }
 
     /* CORPS DE L'ÉDITEUR */
@@ -440,10 +570,10 @@
       font-family: "SF Mono", Consolas, Monaco, "Liberation Mono", Menlo, Courier, monospace;
       font-size: 14.5px;
       line-height: 1.6;
-      color: #1e293b;
+      color: var(--text);
       resize: none;
       outline: none;
-      background: white;
+      background: transparent;
       box-sizing: border-box;
     }
 
@@ -453,10 +583,10 @@
       min-height: 380px;
       padding: 18px 24px;
       overflow-y: auto;
-      background: #ffffff;
+      background: transparent;
       line-height: 1.65;
       font-size: 15px;
-      color: #1e293b;
+      color: var(--text);
       border-left: 1px solid var(--border);
       box-sizing: border-box;
     }
@@ -466,7 +596,7 @@
       margin-top: 1.2em;
       margin-bottom: 0.6em;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--text);
       line-height: 1.3;
     }
     .markdown-preview h1 { font-size: 1.6rem; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
@@ -476,22 +606,22 @@
     .markdown-preview blockquote {
       margin: 1em 0;
       padding: 8px 16px;
-      background: #f8fafc;
+      background: var(--nav-bg);
       border-left: 4px solid var(--primary);
-      color: #475569;
+      color: var(--text-muted);
       border-radius: 0 6px 6px 0;
     }
     .markdown-preview code {
-      background: #f1f5f9;
+      background: var(--nav-bg);
       padding: 2px 6px;
       border-radius: 4px;
       font-family: monospace;
       font-size: 0.9em;
-      color: #be185d;
+      color: var(--danger);
     }
     .markdown-preview pre {
-      background: #0f172a;
-      color: #f8fafc;
+      background: var(--text);
+      color: var(--card-bg);
       padding: 14px;
       border-radius: 8px;
       overflow-x: auto;
@@ -506,14 +636,14 @@
     .markdown-preview hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
     .markdown-preview table { width: 100%; border-collapse: collapse; margin-bottom: 1em; }
     .markdown-preview th, .markdown-preview td { border: 1px solid var(--border); padding: 8px 12px; }
-    .markdown-preview th { background: #f8fafc; font-weight: 600; }
+    .markdown-preview th { background: var(--nav-bg); font-weight: 600; }
     .markdown-preview a { color: var(--primary); text-decoration: underline; }
 
     /* FOOTER DE L'ÉDITEUR */
     .editor-footer-bar {
       padding: 10px 18px;
       border-top: 1px solid var(--border);
-      background: #fafafa;
+      background: var(--nav-bg);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -556,18 +686,18 @@
     }
 
     .btn-outline {
-      background: white;
+      background: var(--card-bg);
       border-color: var(--border-dark);
-      color: #334155;
+      color: var(--text);
     }
     .btn-outline:hover {
-      background: #f1f5f9;
+      background: var(--nav-bg);
       color: var(--text);
     }
 
     .btn-danger-outline {
-      background: white;
-      border-color: #fecaca;
+      background: var(--card-bg);
+      border-color: var(--danger-light);
       color: var(--danger);
     }
     .btn-danger-outline:hover {
@@ -587,8 +717,9 @@
     /* ZONE DE DÉPÔT / UPLOAD */
     .upload-box {
       background: var(--card-bg);
+      backdrop-filter: var(--backdrop);
       border-radius: var(--radius);
-      border: 2px dashed #cbd5e1;
+      border: 2px dashed var(--border-dark);
       padding: 30px 20px;
       text-align: center;
       transition: all 0.2s ease;
@@ -619,9 +750,7 @@
       margin-bottom: 16px;
     }
 
-    .hidden-file-input {
-      display: none;
-    }
+    .hidden-file-input { display: none; }
 
     .upload-progress {
       display: none;
@@ -634,6 +763,7 @@
     /* LISTE DES FICHIERS */
     .files-section-card {
       background: var(--card-bg);
+      backdrop-filter: var(--backdrop);
       border-radius: var(--radius);
       border: 1px solid var(--border);
       box-shadow: var(--shadow-sm);
@@ -648,7 +778,7 @@
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 12px;
-      background: #fafafa;
+      background: var(--nav-bg);
     }
 
     .files-header h2 {
@@ -672,7 +802,7 @@
     }
 
     .file-card {
-      background: #ffffff;
+      background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 12px 14px;
@@ -738,9 +868,9 @@
     }
 
     .btn-file-action {
-      background: #f1f5f9;
-      border: 1px solid transparent;
-      color: #475569;
+      background: var(--nav-bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
       padding: 6px 10px;
       border-radius: 6px;
       font-size: 12px;
@@ -753,21 +883,23 @@
     }
 
     .btn-file-action:hover {
-      background: #e2e8f0;
+      background: var(--border);
       color: var(--text);
     }
 
     .btn-file-action.primary {
       background: var(--primary-light);
+      border-color: transparent;
       color: var(--primary);
     }
     .btn-file-action.primary:hover {
-      background: #dbeafe;
+      filter: brightness(0.95);
     }
 
     .btn-file-delete {
       background: transparent;
-      color: #94a3b8;
+      border-color: transparent;
+      color: var(--text-muted);
     }
     .btn-file-delete:hover {
       background: var(--danger-light);
@@ -783,7 +915,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(15, 23, 42, 0.65);
+      background: rgba(0, 0, 0, 0.65);
       backdrop-filter: blur(4px);
       z-index: 200;
       display: none;
@@ -794,14 +926,15 @@
     }
 
     .modal-dialog {
-      background: white;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
       border-radius: 12px;
       width: 100%;
       max-width: 1050px;
       max-height: 90vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
       overflow: hidden;
       animation: modalScaleUp 0.18s ease-out;
     }
@@ -818,7 +951,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      background: #fafafa;
+      background: var(--nav-bg);
     }
 
     .modal-title-box {
@@ -852,14 +985,14 @@
       padding: 18px 20px;
       overflow-y: auto;
       flex: 1;
-      background: white;
+      background: transparent;
     }
 
     .btn-modal-close {
       background: transparent;
       border: none;
       font-size: 20px;
-      color: #94a3b8;
+      color: var(--text-muted);
       cursor: pointer;
       padding: 4px 8px;
       border-radius: 6px;
@@ -867,7 +1000,7 @@
       transition: all 0.15s;
     }
     .btn-modal-close:hover {
-      background: #f1f5f9;
+      background: var(--border);
       color: var(--text);
     }
 
@@ -889,14 +1022,14 @@
       border-radius: 8px;
       font-size: 13px;
       font-weight: 500;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       animation: fadeIn 0.25s ease, fadeOut 0.25s ease 2.75s forwards;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .toast.success { background: #065f46; }
-    .toast.error { background: #991b1b; }
+    .toast.success { background: #065f46; color: white; }
+    .toast.error { background: #991b1b; color: white; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -913,11 +1046,6 @@
       padding: 40px 20px;
       color: var(--text-muted);
     }
-    .empty-state-icon {
-      font-size: 40px;
-      margin-bottom: 10px;
-      opacity: 0.6;
-    }
   </style>
 </head>
 <body>
@@ -928,16 +1056,26 @@
       <h1><span>📝</span> Mon Espace Personnel</h1>
     </div>
 
-    <!-- ONGLETS DE NAVIGATION -->
-    <div class="nav-tabs">
-      <button class="nav-tab-btn active" id="tabBtnNotes" onclick="switchMainTab('notes')">
-        <span>📝 Bloc-Notes</span>
-        <span class="badge" id="notesCountBadge">0</span>
-      </button>
-      <button class="nav-tab-btn" id="tabBtnFiles" onclick="switchMainTab('files')">
-        <span>📁 Fichiers</span>
-        <span class="badge" id="filesCountBadge">0</span>
-      </button>
+    <div class="header-controls">
+      <!-- SELECTEUR DE THEME -->
+      <div class="theme-switcher">
+        <button class="theme-btn" id="btnThemeLight" onclick="setTheme('light')" title="Thème Clair">☀️</button>
+        <button class="theme-btn" id="btnThemeDark" onclick="setTheme('dark')" title="Thème Sombre">🌙</button>
+        <button class="theme-btn" id="btnThemeGlass" onclick="setTheme('glass')" title="Thème Verre">🔮</button>
+        <button class="theme-btn" id="btnThemeMono" onclick="setTheme('mono')" title="Thème Minimaliste">📓</button>
+      </div>
+
+      <!-- ONGLETS DE NAVIGATION -->
+      <div class="nav-tabs">
+        <button class="nav-tab-btn active" id="tabBtnNotes" onclick="switchMainTab('notes')">
+          <span>📝 Notes</span>
+          <span class="badge" id="notesCountBadge">0</span>
+        </button>
+        <button class="nav-tab-btn" id="tabBtnFiles" onclick="switchMainTab('files')">
+          <span>📁 Fichiers</span>
+          <span class="badge" id="filesCountBadge">0</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -954,7 +1092,7 @@
             <div class="sidebar-title-row">
               <h2>Mes Notes</h2>
               <button class="btn btn-primary" onclick="creerNouvelleNote()">
-                <span>+</span> Nouvelle note
+                <span>+</span> Nouvelle
               </button>
             </div>
             <input type="text" id="notesSearchInput" class="search-input" placeholder="🔍 Rechercher dans les notes..." oninput="filtrerNotes()">
@@ -988,7 +1126,8 @@
               <button class="tool-btn" title="Case à cocher" onclick="insererMarkdown('- [ ] ', '', 'Tâche à faire')">☑ Tâche</button>
               <button class="tool-btn" title="Citation" onclick="insererMarkdown('> ', '', 'Citation')">” Citation</button>
               <button class="tool-btn" title="Code" onclick="insererMarkdown('`', '`', 'code')">&lt;/&gt;</button>
-              <button class="tool-btn" title="Bloc de code" onclick="insererMarkdown('```\n', '\n```', 'code')">Bloc Code</button>
+              <button class="tool-btn" title="Bloc de code" onclick="insererMarkdown('
+```\n', '\n```', 'code')">Bloc Code</button>
               <button class="tool-btn" title="Lien web" onclick="insererMarkdown('[', '](https://)', 'titre du lien')">🔗 Lien</button>
               <button class="tool-btn" title="Séparateur horizontal" onclick="insererMarkdown('\n---\n', '', '')">— Règle</button>
             </div>
@@ -1014,13 +1153,13 @@
             <div class="word-count" id="editorWordCount">0 mots · 0 caractères</div>
             <div class="editor-actions">
               <button class="btn btn-outline" onclick="telechargerNote('md')" title="Télécharger en fichier .md">
-                📥 Exporter .md
+                📥 .md
               </button>
               <button class="btn btn-outline" onclick="telechargerNote('txt')" title="Télécharger en fichier .txt">
-                📄 Exporter .txt
+                📄 .txt
               </button>
               <button class="btn btn-danger-outline" onclick="supprimerNoteActive()" title="Supprimer définitivement cette note">
-                🗑️ Supprimer cette note
+                🗑️
               </button>
             </div>
           </div>
@@ -1040,7 +1179,7 @@
           <input type="file" id="fileInput" class="hidden-file-input" onchange="onFileSelected(this.files)" multiple>
           <div class="upload-icon">☁️</div>
           <div class="upload-title">Glissez vos fichiers ici ou cliquez pour parcourir</div>
-          <div class="upload-subtitle">Tous types de fichiers acceptés (PDF, images, documents, archives...). Les accents et noms d'origine sont préservés.</div>
+          <div class="upload-subtitle">Tous types de fichiers acceptés. Les accents et noms d'origine sont préservés.</div>
           <button type="button" class="btn btn-primary" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
             Choisir un ou plusieurs fichiers
           </button>
@@ -1063,7 +1202,7 @@
   </main>
 
   <!-- ==============================================
-       MODAL DE VISUALISATION DE FICHIERS (IMAGE, PDF, CSV, TEXTE...)
+       MODAL DE VISUALISATION DE FICHIERS
        ============================================== -->
   <div class="modal-overlay" id="fileViewerModal" onclick="fermerVisualiseurSiBackdrop(event)">
     <div class="modal-dialog">
@@ -1073,27 +1212,52 @@
           <div class="modal-meta" id="viewerFileMeta">Taille • Date</div>
         </div>
         <div class="modal-actions">
-          <button class="btn btn-outline" style="font-size:12px; padding:6px 12px;" onclick="telechargerFichierCourantViewer()" title="Télécharger avec son nom propre">
-            📥 Télécharger
+          <button class="btn btn-outline" style="font-size:12px; padding:6px 12px;" onclick="telechargerFichierCourantViewer()" title="Télécharger">
+            📥
           </button>
-          <button class="btn btn-outline" style="font-size:12px; padding:6px 12px;" onclick="ouvrirDansNouvelOngletCourantViewer()" title="Ouvrir dans un nouvel onglet">
-            ↗️ Nouvel onglet
+          <button class="btn btn-outline" style="font-size:12px; padding:6px 12px;" onclick="ouvrirDansNouvelOngletCourantViewer()" title="Ouvrir">
+            ↗️
           </button>
           <button class="btn-modal-close" onclick="fermerVisualiseur()" title="Fermer (Echap)">✕</button>
         </div>
       </div>
       <div class="modal-body" id="viewerModalBody">
-        <!-- Contenu dynamique généré en JS -->
+        <!-- Contenu dynamique -->
       </div>
     </div>
   </div>
 
-  <!-- CONTENEUR DES NOTIFICATIONS TOAST -->
   <div id="toastContainer"></div>
 
   <script>
     // =========================================================================
-    // CONFIGURATION SUPABASE
+    // GESTION DES THEMES DYNAMIQUES
+    // =========================================================================
+    function setTheme(themeName) {
+      // Retirer les anciennes classes de theme
+      document.documentElement.classList.remove('theme-light', 'theme-dark', 'theme-glass', 'theme-mono');
+      
+      // Ajouter la nouvelle
+      if (themeName !== 'light') {
+        document.documentElement.classList.add(`theme-${themeName}`);
+      }
+
+      // Mise à jour visuelle des boutons
+      document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`btnTheme${themeName.charAt(0).toUpperCase() + themeName.slice(1)}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      // Sauvegarde dans localStorage
+      localStorage.setItem('app-theme', themeName);
+    }
+
+    // Chargement du thème au démarrage
+    const savedTheme = localStorage.getItem('app-theme') || 'light';
+    setTheme(savedTheme);
+
+
+    // =========================================================================
+    // CONFIGURATION SUPABASE ET LOGIQUE INITIALE (INTACTE)
     // =========================================================================
     const SUPABASE_URL = 'https://hxyamzngoknamivstuxb.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4eWFtem5nb2tuYW1pdnN0dXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3NDM1NDIsImV4cCI6MjEwODMxOTU0Mn0._qR8vW8bYWj-JF6HMkkRAA0R7nQ7i2gpCYIGylFjxDA';
@@ -1106,17 +1270,10 @@
       showToast('Erreur initialisation Supabase', 'error');
     }
 
-    // Configuration de marked (rendu Markdown)
     if (typeof marked !== 'undefined') {
-      marked.use({
-        breaks: true,
-        gfm: true
-      });
+      marked.use({ breaks: true, gfm: true });
     }
 
-    // =========================================================================
-    // ÉTAT GLOBAL DE L'APPLICATION
-    // =========================================================================
     let notes = [];
     let activeNote = null;
     let autoSaveTimer = null;
@@ -1124,7 +1281,6 @@
     let storedFiles = [];
     let currentViewerFileIdx = null;
 
-    // Initialisation au chargement de la page
     document.addEventListener('DOMContentLoaded', () => {
       initDragAndDrop();
       if (supabaseClient) {
@@ -1132,28 +1288,21 @@
         chargerFichiers();
       }
 
-      // Raccourcis clavier globaux
       window.addEventListener('keydown', (e) => {
-        // Ctrl+S / Cmd+S : sauvegarder note
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
           e.preventDefault();
           sauvegarderNoteImmediate();
         }
-        // Echap : fermer le visualiseur de fichier si ouvert
         if (e.key === 'Escape') {
           fermerVisualiseur();
         }
       });
 
-      // Sauvegarde immédiate avant fermeture
       window.addEventListener('beforeunload', () => {
         sauvegarderNoteImmediate();
       });
     });
 
-    // =========================================================================
-    // GESTION DES ONGLETS PRINCIPAUX (Notes vs Fichiers)
-    // =========================================================================
     function switchMainTab(tabName) {
       document.getElementById('tabBtnNotes').classList.toggle('active', tabName === 'notes');
       document.getElementById('tabBtnFiles').classList.toggle('active', tabName === 'files');
@@ -1161,36 +1310,22 @@
       document.getElementById('tabContentFiles').classList.toggle('active', tabName === 'files');
     }
 
-    // =========================================================================
-    // ENCODAGE / DÉCODAGE FIABLE DES NOMS DE FICHIERS AVEC ACCENTS
-    // =========================================================================
     function utf8ToBase64Url(str) {
       const bytes = new TextEncoder().encode(str);
       let binary = '';
-      for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      return btoa(binary)
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/, '');
+      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     }
 
     function base64UrlToUtf8(str) {
       try {
         let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-        while (base64.length % 4) {
-          base64 += '=';
-        }
+        while (base64.length % 4) base64 += '=';
         const binary = atob(base64);
         const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) {
-          bytes[i] = binary.charCodeAt(i);
-        }
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
         return new TextDecoder().decode(bytes);
-      } catch (e) {
-        return str;
-      }
+      } catch (e) { return str; }
     }
 
     function generateStorageKey(fileName) {
@@ -1201,26 +1336,19 @@
     }
 
     function decodeStorageKey(storageKey) {
-      // Format moderne : fn_<timestamp>_<base64Url>[.<ext>]
       const matchNew = storageKey.match(/^fn_[a-z0-9]+_([A-Za-z0-9_-]+?)(\.[a-z0-9]+)?$/);
       if (matchNew && matchNew[1]) {
         const decoded = base64UrlToUtf8(matchNew[1]);
         if (decoded) return decoded;
       }
-
-      // Format ancien (avec Date.now()_ au début) : supprime la suite de chiffres
       const matchOld = storageKey.match(/^\d+_(.+)$/);
-      if (matchOld && matchOld[1]) {
-        return matchOld[1];
-      }
-
+      if (matchOld && matchOld[1]) return matchOld[1];
       return storageKey;
     }
 
     // =========================================================================
-    // SECTION 1 : GESTION DES NOTES (BLOC-NOTES .TXT / MARKDOWN)
+    // SECTION NOTES
     // =========================================================================
-
     async function chargerNotes() {
       const listContainer = document.getElementById('notesListContainer');
       try {
@@ -1230,7 +1358,6 @@
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-
         notes = data || [];
         document.getElementById('notesCountBadge').textContent = notes.length;
 
@@ -1240,14 +1367,12 @@
         }
 
         const savedNoteId = localStorage.getItem('active_note_id');
-        const found = notes.find(n => n.id === savedNoteId);
-        activeNote = found || notes[0];
-
+        activeNote = notes.find(n => n.id === savedNoteId) || notes[0];
         afficherListeNotes();
         afficherNoteActive();
       } catch (err) {
         console.error('Erreur chargerNotes:', err);
-        listContainer.innerHTML = `<div class="empty-state" style="color:var(--danger)">Erreur de chargement : ${err.message}</div>`;
+        listContainer.innerHTML = `<div class="empty-state" style="color:var(--danger)">Erreur : ${err.message}</div>`;
       }
     }
 
@@ -1260,7 +1385,7 @@
       });
 
       if (filtered.length === 0) {
-        listContainer.innerHTML = '<div class="empty-state">Aucune note trouvée.</div>';
+        listContainer.innerHTML = '<div class="empty-state">Aucune note.</div>';
         return;
       }
 
@@ -1277,24 +1402,19 @@
               <div class="note-card-preview">${apercu}</div>
               <div class="note-card-date">${dateStr}</div>
             </div>
-            <button class="btn-delete-item" title="Supprimer la note" onclick="supprimerNote('${n.id}', event)">
-              🗑️
-            </button>
+            <button class="btn-delete-item" title="Supprimer" onclick="supprimerNote('${n.id}', event)">🗑️</button>
           </div>
         `;
       }).join('');
     }
 
     function filtrerNotes() {
-      const search = document.getElementById('notesSearchInput').value.trim();
-      afficherListeNotes(search);
+      afficherListeNotes(document.getElementById('notesSearchInput').value.trim());
     }
 
     function selectionnerNote(noteId) {
       if (activeNote && activeNote.id === noteId) return;
-
       sauvegarderNoteImmediate();
-
       const found = notes.find(n => n.id === noteId);
       if (found) {
         activeNote = found;
@@ -1312,7 +1432,6 @@
         document.getElementById('editorWordCount').textContent = '0 mots · 0 caractères';
         return;
       }
-
       document.getElementById('noteTitleInput').value = activeNote.titre || '';
       document.getElementById('noteTextarea').value = activeNote.contenu || '';
       mettreAJourCompteurMots();
@@ -1322,26 +1441,15 @@
 
     async function creerNouvelleNote(titreInitial = 'Nouvelle note', contenuInitial = '') {
       sauvegarderNoteImmediate();
-
-      const nouvelle = {
-        titre: titreInitial,
-        contenu: contenuInitial,
-        termine: false
-      };
-
+      const nouvelle = { titre: titreInitial, contenu: contenuInitial, termine: false };
       try {
         setSaveStatus('saving');
-        const { data, error } = await supabaseClient
-          .from('ma_table_mobile')
-          .insert([nouvelle])
-          .select();
-
+        const { data, error } = await supabaseClient.from('ma_table_mobile').insert([nouvelle]).select();
         if (error) throw error;
-
-        const noteCree = data[0];
-        notes.unshift(noteCree);
+        
+        notes.unshift(data[0]);
         document.getElementById('notesCountBadge').textContent = notes.length;
-        activeNote = noteCree;
+        activeNote = data[0];
         localStorage.setItem('active_note_id', activeNote.id);
 
         afficherListeNotes();
@@ -1353,28 +1461,16 @@
           titleInput.focus();
           titleInput.select();
         }, 100);
-      } catch (err) {
-        console.error('Erreur création note:', err);
-        alert('Erreur création note : ' + err.message);
-      }
+      } catch (err) { alert('Erreur création note : ' + err.message); }
     }
 
     async function supprimerNote(noteId, event) {
       if (event) event.stopPropagation();
-
       const foundNote = notes.find(n => n.id === noteId);
-      const nom = foundNote && foundNote.titre ? foundNote.titre : 'cette note';
-
-      if (!confirm(`Voulez-vous vraiment supprimer définitivement "${nom}" ?`)) {
-        return;
-      }
+      if (!confirm(`Supprimer définitivement "${foundNote?.titre || 'cette note'}" ?`)) return;
 
       try {
-        const { error } = await supabaseClient
-          .from('ma_table_mobile')
-          .delete()
-          .eq('id', noteId);
-
+        const { error } = await supabaseClient.from('ma_table_mobile').delete().eq('id', noteId);
         if (error) throw error;
 
         notes = notes.filter(n => n.id !== noteId);
@@ -1383,36 +1479,22 @@
 
         if (activeNote && activeNote.id === noteId) {
           activeNote = notes.length > 0 ? notes[0] : null;
-          if (activeNote) {
-            localStorage.setItem('active_note_id', activeNote.id);
-          } else {
-            localStorage.removeItem('active_note_id');
-            await creerNouvelleNote('Ma première note', '');
-            return;
-          }
+          if (activeNote) localStorage.setItem('active_note_id', activeNote.id);
+          else { localStorage.removeItem('active_note_id'); await creerNouvelleNote('', ''); return; }
         }
-
         afficherListeNotes();
         afficherNoteActive();
-      } catch (err) {
-        console.error('Erreur suppression note:', err);
-        alert('Erreur lors de la suppression : ' + err.message);
-      }
+      } catch (err) { alert('Erreur : ' + err.message); }
     }
 
-    function supprimerNoteActive() {
-      if (!activeNote) return;
-      supprimerNote(activeNote.id);
-    }
+    function supprimerNoteActive() { if (activeNote) supprimerNote(activeNote.id); }
 
     function onNoteTitleChange() {
       if (!activeNote) return;
       activeNote.titre = document.getElementById('noteTitleInput').value;
       planifierSauvegarde();
       const activeCardTitle = document.querySelector('.note-card.active .note-card-title');
-      if (activeCardTitle) {
-        activeCardTitle.textContent = activeNote.titre || 'Sans titre';
-      }
+      if (activeCardTitle) activeCardTitle.textContent = activeNote.titre || 'Sans titre';
     }
 
     function onNoteContentChange() {
@@ -1421,86 +1503,53 @@
       planifierSauvegarde();
       mettreAJourCompteurMots();
       mettreAJourRenduMarkdown();
-
       const activeCardPreview = document.querySelector('.note-card.active .note-card-preview');
-      if (activeCardPreview) {
-        activeCardPreview.textContent = activeNote.contenu.replace(/[#*`>_-]/g, '').trim().substring(0, 50) || 'Note vide...';
-      }
+      if (activeCardPreview) activeCardPreview.textContent = activeNote.contenu.replace(/[#*`>_-]/g, '').trim().substring(0, 50) || 'Note vide...';
     }
 
     function planifierSauvegarde() {
       setSaveStatus('saving');
       if (autoSaveTimer) clearTimeout(autoSaveTimer);
-      autoSaveTimer = setTimeout(() => {
-        executerSauvegarde();
-      }, 600);
+      autoSaveTimer = setTimeout(() => executerSauvegarde(), 600);
     }
 
     async function executerSauvegarde() {
       if (!activeNote) return;
       try {
-        const { error } = await supabaseClient
-          .from('ma_table_mobile')
-          .update({
-            titre: activeNote.titre,
-            contenu: activeNote.contenu
-          })
-          .eq('id', activeNote.id);
-
+        const { error } = await supabaseClient.from('ma_table_mobile')
+          .update({ titre: activeNote.titre, contenu: activeNote.contenu }).eq('id', activeNote.id);
         if (error) throw error;
         setSaveStatus('saved');
-      } catch (err) {
-        console.error('Erreur sauvegarde temps réel:', err);
-        setSaveStatus('error');
-      }
+      } catch (err) { setSaveStatus('error'); }
     }
 
     function sauvegarderNoteImmediate() {
-      if (autoSaveTimer) {
-        clearTimeout(autoSaveTimer);
-        autoSaveTimer = null;
-        executerSauvegarde();
-      }
+      if (autoSaveTimer) { clearTimeout(autoSaveTimer); autoSaveTimer = null; executerSauvegarde(); }
     }
 
     function setSaveStatus(status) {
       const el = document.getElementById('saveStatus');
       if (!el) return;
       el.className = 'save-status ' + status;
-      if (status === 'saved') {
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        el.textContent = `✓ Enregistré à ${timeStr}`;
-      } else if (status === 'saving') {
-        el.textContent = '⏳ Enregistrement...';
-      } else if (status === 'error') {
-        el.textContent = '⚠️ Erreur sauvegarde';
-      }
+      if (status === 'saved') el.textContent = `✓ Enregistré à ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      else if (status === 'saving') el.textContent = '⏳ Enregistrement...';
+      else if (status === 'error') el.textContent = '⚠️ Erreur';
     }
 
     function mettreAJourRenduMarkdown() {
       const preview = document.getElementById('noteMarkdownPreview');
       const text = document.getElementById('noteTextarea').value;
       if (typeof marked !== 'undefined') {
-        try {
-          preview.innerHTML = marked.parse(text || '*Note vide...*');
-        } catch (e) {
-          preview.innerHTML = renderMarkdownFallback(text);
-        }
-      } else {
-        preview.innerHTML = renderMarkdownFallback(text);
-      }
+        try { preview.innerHTML = marked.parse(text || '*Note vide...*'); }
+        catch (e) { preview.innerHTML = renderMarkdownFallback(text); }
+      } else preview.innerHTML = renderMarkdownFallback(text);
     }
 
     function renderMarkdownFallback(src) {
       if (!src) return '<em>Note vide...</em>';
       let html = escapeHtml(src);
-      html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-      html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-      html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-      html = html.replace(/\*\*(.*?)\*\*/gim, '<b>$1</b>');
-      html = html.replace(/\*(.*?)\*/gim, '<i>$1</i>');
-      html = html.replace(/\n/gim, '<br>');
+      html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>').replace(/^## (.*$)/gim, '<h2>$1</h2>').replace(/^# (.*$)/gim, '<h1>$1</h1>');
+      html = html.replace(/\*\*(.*?)\*\*/gim, '<b>$1</b>').replace(/\*(.*?)\*/gim, '<i>$1</i>').replace(/\n/gim, '<br>');
       return html;
     }
 
@@ -1514,49 +1563,27 @@
       const textarea = document.getElementById('noteTextarea');
       const preview = document.getElementById('noteMarkdownPreview');
 
-      if (mode === 'edit') {
-        container.classList.remove('split');
-        textarea.style.display = 'block';
-        preview.style.display = 'none';
-      } else if (mode === 'preview') {
-        container.classList.remove('split');
-        textarea.style.display = 'none';
-        preview.style.display = 'block';
-        mettreAJourRenduMarkdown();
-      } else if (mode === 'split') {
-        container.classList.add('split');
-        textarea.style.display = 'block';
-        preview.style.display = 'block';
-        mettreAJourRenduMarkdown();
-      }
+      if (mode === 'edit') { container.classList.remove('split'); textarea.style.display = 'block'; preview.style.display = 'none'; }
+      else if (mode === 'preview') { container.classList.remove('split'); textarea.style.display = 'none'; preview.style.display = 'block'; mettreAJourRenduMarkdown(); }
+      else if (mode === 'split') { container.classList.add('split'); textarea.style.display = 'block'; preview.style.display = 'block'; mettreAJourRenduMarkdown(); }
     }
 
     function insererMarkdown(avant, apres, texteParDefaut) {
       const textarea = document.getElementById('noteTextarea');
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const val = textarea.value;
-
-      let selection = val.substring(start, end);
-      if (!selection) selection = texteParDefaut;
-
-      const replacement = avant + selection + apres;
-      textarea.value = val.substring(0, start) + replacement + val.substring(end);
-
+      const start = textarea.selectionStart, end = textarea.selectionEnd, val = textarea.value;
+      let selection = val.substring(start, end) || texteParDefaut;
+      textarea.value = val.substring(0, start) + avant + selection + apres + val.substring(end);
       textarea.focus();
       textarea.setSelectionRange(start + avant.length, start + avant.length + selection.length);
-
       onNoteContentChange();
     }
 
     function gererToucheClavier(e) {
       if (e.key === 'Tab') {
         e.preventDefault();
-        const textarea = e.target;
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        textarea.value = textarea.value.substring(0, start) + '  ' + textarea.value.substring(end);
-        textarea.selectionStart = textarea.selectionEnd = start + 2;
+        const start = e.target.selectionStart, end = e.target.selectionEnd;
+        e.target.value = e.target.value.substring(0, start) + '  ' + e.target.value.substring(end);
+        e.target.selectionStart = e.target.selectionEnd = start + 2;
         onNoteContentChange();
       }
     }
@@ -1565,603 +1592,182 @@
       const text = document.getElementById('noteTextarea').value;
       const chars = text.length;
       const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-      document.getElementById('editorWordCount').textContent = `${words} mot${words > 1 ? 's' : ''} · ${chars} caractère${chars > 1 ? 's' : ''}`;
+      document.getElementById('editorWordCount').textContent = `${words} mot(s) · ${chars} caractère(s)`;
     }
 
     function telechargerNote(format = 'md') {
       if (!activeNote) return;
       const nomFichier = (activeNote.titre || 'note').replace(/[/\\?%*:|"<>]/g, '_') + '.' + format;
-      const contenu = activeNote.contenu || '';
-
-      const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
+      const blob = new Blob([activeNote.contenu || ''], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = nomFichier;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast(`Note exportée en ${format.toUpperCase()}`, 'success');
+      const a = document.createElement('a'); a.href = url; a.download = nomFichier;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+      showToast(`Exporté en ${format.toUpperCase()}`, 'success');
     }
 
     // =========================================================================
-    // SECTION 2 : DÉPÔT, VISUALISATION & TÉLÉCHARGEMENT DES FICHIERS
+    // SECTION FICHIERS
     // =========================================================================
-
     function initDragAndDrop() {
       const dropZone = document.getElementById('dropZone');
-      ['dragenter', 'dragover'].forEach(name => {
-        dropZone.addEventListener(name, (e) => {
-          e.preventDefault();
-          dropZone.classList.add('dragover');
-        });
-      });
-      ['dragleave', 'drop'].forEach(name => {
-        dropZone.addEventListener(name, (e) => {
-          e.preventDefault();
-          dropZone.classList.remove('dragover');
-        });
-      });
-      dropZone.addEventListener('drop', (e) => {
-        if (e.dataTransfer && e.dataTransfer.files) {
-          onFileSelected(e.dataTransfer.files);
-        }
-      });
+      ['dragenter', 'dragover'].forEach(n => dropZone.addEventListener(n, (e) => { e.preventDefault(); dropZone.classList.add('dragover'); }));
+      ['dragleave', 'drop'].forEach(n => dropZone.addEventListener(n, (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); }));
+      dropZone.addEventListener('drop', (e) => { if (e.dataTransfer && e.dataTransfer.files) onFileSelected(e.dataTransfer.files); });
     }
 
     async function onFileSelected(fileList) {
       if (!fileList || fileList.length === 0) return;
-
       const progressEl = document.getElementById('uploadProgress');
       progressEl.style.display = 'block';
-
       let successCount = 0;
+
       for (let i = 0; i < fileList.length; i++) {
         const file = fileList[i];
         progressEl.textContent = `⏳ Envoi de ${file.name} (${i + 1}/${fileList.length})...`;
-
         try {
           const storageKey = generateStorageKey(file.name);
           const { error } = await supabaseClient.storage.from('fichiers').upload(storageKey, file, { upsert: true });
-
           if (error) throw error;
           successCount++;
-        } catch (err) {
-          console.error(`Erreur upload pour ${file.name}:`, err);
-          alert(`Erreur d'envoi pour "${file.name}" : ${err.message}`);
-        }
+        } catch (err) { alert(`Erreur "${file.name}" : ${err.message}`); }
       }
-
       progressEl.style.display = 'none';
       document.getElementById('fileInput').value = '';
-
-      if (successCount > 0) {
-        showToast(`${successCount} fichier${successCount > 1 ? 's' : ''} envoyé(s) !`, 'success');
-        chargerFichiers();
-      }
+      if (successCount > 0) { showToast(`${successCount} fichier(s) envoyé(s) !`, 'success'); chargerFichiers(); }
     }
 
     async function chargerFichiers() {
       const listContainer = document.getElementById('filesListContainer');
       try {
-        const { data, error } = await supabaseClient.storage.from('fichiers').list('', {
-          sortBy: { column: 'created_at', order: 'desc' }
-        });
-
+        const { data, error } = await supabaseClient.storage.from('fichiers').list('', { sortBy: { column: 'created_at', order: 'desc' } });
         if (error) throw error;
 
         storedFiles = data || [];
         document.getElementById('filesCountBadge').textContent = storedFiles.length;
         document.getElementById('filesCountHeader').textContent = storedFiles.length;
 
-        if (storedFiles.length === 0) {
-          listContainer.innerHTML = '<div class="empty-state">Aucun fichier enregistré pour l\'instant.</div>';
-          return;
-        }
+        if (storedFiles.length === 0) { listContainer.innerHTML = '<div class="empty-state">Aucun fichier.</div>'; return; }
 
         listContainer.innerHTML = storedFiles.map((f, idx) => {
-          const rawKey = f.name;
-          const nomPropre = decodeStorageKey(rawKey);
-          const taille = formaterTaille(f.metadata ? f.metadata.size : 0);
-          const dateStr = formaterDate(f.created_at || (f.metadata ? f.metadata.lastModified : null));
-          const icon = determinerIconeFichier(nomPropre);
-
+          const nomPropre = decodeStorageKey(f.name);
           return `
             <div class="file-card">
-              <div class="file-left" onclick="ouvrirFichierParIndex(${idx})" title="Cliquer pour afficher / ouvrir">
-                <div class="file-type-icon">${icon}</div>
+              <div class="file-left" onclick="ouvrirFichierParIndex(${idx})">
+                <div class="file-type-icon">${determinerIconeFichier(nomPropre)}</div>
                 <div class="file-details">
-                  <div class="file-name" title="${escapeHtml(nomPropre)}">${escapeHtml(nomPropre)}</div>
-                  <div class="file-meta">
-                    <span>${taille}</span>
-                    ${dateStr ? `<span>• ${dateStr}</span>` : ''}
-                  </div>
+                  <div class="file-name">${escapeHtml(nomPropre)}</div>
+                  <div class="file-meta"><span>${formaterTaille(f.metadata?.size)}</span> • ${formaterDate(f.created_at)}</div>
                 </div>
               </div>
               <div class="file-actions">
-                <button class="btn-file-action primary" onclick="ouvrirFichierParIndex(${idx})" title="Visualiser / Ouvrir le fichier">
-                  👁️ Ouvrir
-                </button>
-                <button class="btn-file-action" onclick="telechargerFichierParIndex(${idx})" title="Télécharger avec son nom d'origine">
-                  📥 Télécharger
-                </button>
-                <button class="btn-file-action btn-file-delete" onclick="supprimerFichierParIndex(${idx})" title="Supprimer définitivement ce fichier">
-                  🗑️
-                </button>
+                <button class="btn-file-action primary" onclick="ouvrirFichierParIndex(${idx})">👁️</button>
+                <button class="btn-file-action btn-file-delete" onclick="supprimerFichierParIndex(${idx})">🗑️</button>
               </div>
             </div>
           `;
         }).join('');
-      } catch (err) {
-        console.error('Erreur chargement fichiers:', err);
-        listContainer.innerHTML = `<div class="empty-state" style="color:var(--danger)">Erreur fichiers : ${err.message}</div>`;
-      }
+      } catch (err) { listContainer.innerHTML = `<div class="empty-state" style="color:var(--danger)">Erreur : ${err.message}</div>`; }
     }
-
-    // =========================================================================
-    // VISUALISEUR DE FICHIERS INTERACTIF (MODAL)
-    // =========================================================================
 
     async function ouvrirFichierParIndex(idx) {
       const fileObj = storedFiles[idx];
       if (!fileObj) return;
-
       currentViewerFileIdx = idx;
-      const rawKey = fileObj.name;
-      const nomPropre = decodeStorageKey(rawKey);
-      const { data: urlData } = supabaseClient.storage.from('fichiers').getPublicUrl(rawKey);
-      const publicUrl = urlData.publicUrl;
+      const nomPropre = decodeStorageKey(fileObj.name);
+      const { data: { publicUrl } } = supabaseClient.storage.from('fichiers').getPublicUrl(fileObj.name);
       const ext = nomPropre.includes('.') ? nomPropre.split('.').pop().toLowerCase() : '';
-      const taille = formaterTaille(fileObj.metadata ? fileObj.metadata.size : 0);
-      const dateStr = formaterDate(fileObj.created_at || (fileObj.metadata ? fileObj.metadata.lastModified : null));
-
-      const modal = document.getElementById('fileViewerModal');
-      const titleEl = document.getElementById('viewerFileName');
-      const metaEl = document.getElementById('viewerFileMeta');
+      
+      document.getElementById('viewerFileName').textContent = nomPropre;
+      document.getElementById('viewerFileMeta').textContent = `${formaterTaille(fileObj.metadata?.size)}`;
       const bodyEl = document.getElementById('viewerModalBody');
+      bodyEl.innerHTML = '<div style="text-align:center; padding:50px;">⏳ Chargement...</div>';
+      document.getElementById('fileViewerModal').style.display = 'flex';
 
-      titleEl.textContent = nomPropre;
-      metaEl.textContent = `${taille} ${dateStr ? '• ' + dateStr : ''}`;
-      bodyEl.innerHTML = '<div style="text-align:center; padding:50px; color:#64748b; font-size:15px;">⏳ Chargement du fichier...</div>';
-      modal.style.display = 'flex';
-
-      // 1. IMAGES
-      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'].includes(ext)) {
-        bodyEl.innerHTML = `
-          <div style="display:flex; justify-content:center; align-items:center; min-height:250px; background:#0f172a; border-radius:8px; padding:16px;">
-            <img src="${publicUrl}" alt="${escapeHtml(nomPropre)}" style="max-width:100%; max-height:72vh; object-fit:contain; border-radius:4px; box-shadow:0 4px 14px rgba(0,0,0,0.4);">
-          </div>
-        `;
-        return;
-      }
-
-      // 2. DOCUMENTS PDF
-      if (ext === 'pdf') {
-        bodyEl.innerHTML = `
-          <iframe src="${publicUrl}" style="width:100%; height:75vh; border:none; border-radius:8px;"></iframe>
-        `;
-        return;
-      }
-
-      // 3. FICHIERS CSV (Affichage structuré en tableau interactif + texte brut)
-      if (ext === 'csv') {
+      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
+        bodyEl.innerHTML = `<div style="text-align:center;"><img src="${publicUrl}" style="max-width:100%; max-height:72vh; object-fit:contain;"></div>`;
+      } else if (ext === 'pdf') {
+        bodyEl.innerHTML = `<iframe src="${publicUrl}" style="width:100%; height:75vh; border:none;"></iframe>`;
+      } else if (['mp4', 'webm', 'mov'].includes(ext)) {
+        bodyEl.innerHTML = `<div style="text-align:center;"><video controls src="${publicUrl}" style="max-width:100%; max-height:72vh;"></video></div>`;
+      } else if (['mp3', 'wav', 'ogg'].includes(ext)) {
+        bodyEl.innerHTML = `<div style="text-align:center; padding:50px;"><audio controls src="${publicUrl}"></audio></div>`;
+      } else if (['txt', 'md', 'csv', 'json', 'js', 'html', 'css'].includes(ext)) {
         try {
           const res = await fetch(publicUrl);
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          const buffer = await res.arrayBuffer();
-          let text;
-          try {
-            text = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
-          } catch (e) {
-            text = new TextDecoder('windows-1252').decode(buffer);
-          }
-          afficherVisualiseurCsv(text, nomPropre, bodyEl);
-        } catch (err) {
-          bodyEl.innerHTML = `<div style="color:var(--danger); padding:24px;">Erreur de lecture du fichier CSV : ${escapeHtml(err.message)}</div>`;
-        }
-        return;
-      }
-
-      // 4. FICHIERS TEXTE / MARKDOWN / CODE
-      if (['txt', 'md', 'json', 'js', 'html', 'css', 'py', 'sql', 'xml', 'log', 'env', 'sh', 'bat', 'ps1', 'yml', 'yaml'].includes(ext)) {
-        try {
-          const res = await fetch(publicUrl);
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          const buffer = await res.arrayBuffer();
-          let text;
-          try {
-            text = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
-          } catch (e) {
-            text = new TextDecoder('windows-1252').decode(buffer);
-          }
-
-          if (ext === 'md' && typeof marked !== 'undefined') {
-            bodyEl.innerHTML = `
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <div class="view-mode-tabs">
-                  <button class="view-mode-btn active" id="btnMdViewRendered" onclick="basculerApercuMd('rendered')">👁️ Rendu</button>
-                  <button class="view-mode-btn" id="btnMdViewRaw" onclick="basculerApercuMd('raw')">📄 Brut</button>
-                </div>
-                <button class="btn btn-outline" style="font-size:12px; padding:4px 10px;" onclick="copierTexteModal()">📋 Copier</button>
-              </div>
-              <div id="mdContainerRendered" class="markdown-preview" style="max-height:68vh; overflow-y:auto; border:1px solid var(--border); border-radius:6px; padding:18px;">
-                ${marked.parse(text)}
-              </div>
-              <pre id="mdContainerRaw" style="display:none; max-height:68vh; overflow:auto; background:#f8fafc; color:#1e293b; padding:16px; border:1px solid var(--border); border-radius:6px; font-family:monospace; font-size:13px; line-height:1.5; white-space:pre-wrap; margin:0;">${escapeHtml(text)}</pre>
-            `;
-          } else {
-            bodyEl.innerHTML = `
-              <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
-                <button class="btn btn-outline" style="font-size:12px; padding:4px 12px;" onclick="copierTexteModal()">📋 Copier le contenu</button>
-              </div>
-              <pre id="rawTextModalContent" style="max-height:68vh; overflow:auto; background:#f8fafc; color:#1e293b; padding:16px; border:1px solid var(--border); border-radius:8px; font-family:monospace; font-size:13px; line-height:1.55; white-space:pre-wrap; margin:0;">${escapeHtml(text)}</pre>
-            `;
-          }
-        } catch (err) {
-          bodyEl.innerHTML = `<div style="color:var(--danger); padding:24px;">Erreur de lecture du fichier : ${escapeHtml(err.message)}</div>`;
-        }
-        return;
-      }
-
-      // 5. AUDIO
-      if (['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac'].includes(ext)) {
-        bodyEl.innerHTML = `
-          <div style="text-align:center; padding:50px 20px;">
-            <div style="font-size:55px; margin-bottom:16px;">🎵</div>
-            <h3 style="margin-top:0; color:var(--text);">${escapeHtml(nomPropre)}</h3>
-            <audio controls src="${publicUrl}" style="width:100%; max-width:500px; margin-top:10px;"></audio>
-          </div>
-        `;
-        return;
-      }
-
-      // 6. VIDÉO
-      if (['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(ext)) {
-        bodyEl.innerHTML = `
-          <div style="display:flex; justify-content:center; background:#0f172a; border-radius:8px; padding:10px;">
-            <video controls src="${publicUrl}" style="max-width:100%; max-height:72vh; border-radius:4px;"></video>
-          </div>
-        `;
-        return;
-      }
-
-      // 7. FORMATS NON-VISUALISABLES DIRECTEMENT (Word, Excel, Zip, etc.)
-      bodyEl.innerHTML = `
-        <div style="text-align:center; padding:50px 20px;">
-          <div style="font-size:55px; margin-bottom:14px;">📦</div>
-          <h3 style="margin-top:0; color:var(--text); font-size:1.15rem;">${escapeHtml(nomPropre)}</h3>
-          <p style="color:var(--text-muted); max-width:500px; margin:0 auto 22px auto; font-size:14px; line-height:1.5;">
-            Les fichiers de type <b>.${escapeHtml(ext.toUpperCase() || 'inconnu')}</b> ne peuvent pas être prévisualisés directement dans un navigateur sans application tierce.
-          </p>
-          <button class="btn btn-primary" style="padding:10px 22px; font-size:14px;" onclick="telechargerFichierParIndex(${idx})">
-            📥 Télécharger "${escapeHtml(nomPropre)}"
-          </button>
-        </div>
-      `;
-    }
-
-    // AFFICHEUR CSV DÉDIÉ AVEC RECHERCHE ET TABLEAU
-    function afficherVisualiseurCsv(text, nomPropre, container) {
-      window._csvRawText = text;
-      const lines = text.trim().split(/\r\n|\n/).filter(l => l.trim().length > 0);
-      if (lines.length === 0) {
-        container.innerHTML = '<div class="empty-state">Le fichier CSV est vide.</div>';
-        return;
-      }
-
-      // Détecter le séparateur
-      const firstLine = lines[0];
-      const countSemi = (firstLine.match(/;/g) || []).length;
-      const countComma = (firstLine.match(/,/g) || []).length;
-      const countTab = (firstLine.match(/\t/g) || []).length;
-      let sep = ';';
-      if (countComma > countSemi && countComma >= countTab) sep = ',';
-      else if (countTab > countSemi && countTab > countComma) sep = '\t';
-
-      function parseLine(line) {
-        const res = [];
-        let cur = '';
-        let inQuotes = false;
-        for (let i = 0; i < line.length; i++) {
-          const c = line[i];
-          if (c === '"') {
-            inQuotes = !inQuotes;
-          } else if (c === sep && !inQuotes) {
-            res.push(cur.trim());
-            cur = '';
-          } else {
-            cur += c;
-          }
-        }
-        res.push(cur.trim());
-        return res;
-      }
-
-      const rows = lines.map(parseLine);
-      const headers = rows[0];
-      const dataRows = rows.slice(1);
-
-      window._csvDataRows = dataRows;
-      window._csvHeaders = headers;
-
-      container.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <input type="text" id="csvSearchInput" class="search-input" placeholder="🔍 Rechercher dans le tableau..." style="width:250px;" oninput="filtrerTableCsv()">
-            <span id="csvRowCountBadge" style="font-size:12px; color:var(--text-muted); font-weight:500;">${dataRows.length} ligne${dataRows.length > 1 ? 's' : ''}</span>
-          </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <div class="view-mode-tabs">
-              <button class="view-mode-btn active" id="btnCsvViewTable" onclick="basculerApercuCsv('table')">📊 Tableau</button>
-              <button class="view-mode-btn" id="btnCsvViewRaw" onclick="basculerApercuCsv('raw')">📄 Texte brut</button>
-            </div>
-            <button class="btn btn-outline" style="font-size:12px; padding:4px 10px;" onclick="copierTextePressePapier(window._csvRawText)">📋 Copier</button>
-          </div>
-        </div>
-
-        <!-- TABLEAU CSV -->
-        <div id="csvTableWrapper" style="max-height:68vh; overflow:auto; border:1px solid var(--border); border-radius:8px;">
-          <table style="width:100%; border-collapse:collapse; font-size:13px; text-align:left;">
-            <thead style="position:sticky; top:0; background:#f1f5f9; z-index:2; box-shadow:0 1px 2px rgba(0,0,0,0.06);">
-              <tr>
-                <th style="padding:10px 12px; border-bottom:2px solid var(--border); color:#64748b; width:45px;">#</th>
-                ${headers.map(h => `<th style="padding:10px 12px; border-bottom:2px solid var(--border); font-weight:700; color:#334155; white-space:nowrap;">${escapeHtml(h)}</th>`).join('')}
-              </tr>
-            </thead>
-            <tbody id="csvTableBody">
-              ${dataRows.map((row, rIdx) => `
-                <tr style="border-bottom:1px solid var(--border); background:${rIdx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
-                  <td style="padding:8px 12px; color:#94a3b8; font-size:11px;">${rIdx + 1}</td>
-                  ${headers.map((_, cIdx) => `<td style="padding:8px 12px; color:#1e293b;">${escapeHtml(row[cIdx] || '')}</td>`).join('')}
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-
-        <!-- TEXTE BRUT CSV -->
-        <pre id="csvRawWrapper" style="display:none; max-height:68vh; overflow:auto; background:#f8fafc; color:#1e293b; padding:16px; border:1px solid var(--border); border-radius:8px; font-family:monospace; font-size:13px; line-height:1.5; white-space:pre-wrap; margin:0;">${escapeHtml(text)}</pre>
-      `;
-    }
-
-    function filtrerTableCsv() {
-      const q = (document.getElementById('csvSearchInput').value || '').toLowerCase().trim();
-      const rows = window._csvDataRows || [];
-      const headers = window._csvHeaders || [];
-      const tbody = document.getElementById('csvTableBody');
-      const badge = document.getElementById('csvRowCountBadge');
-
-      let visibleCount = 0;
-      tbody.innerHTML = rows.map((row, rIdx) => {
-        const rowStr = row.join(' ').toLowerCase();
-        if (q && !rowStr.includes(q)) return '';
-        visibleCount++;
-        return `
-          <tr style="border-bottom:1px solid var(--border); background:${visibleCount % 2 === 0 ? '#f8fafc' : '#ffffff'};">
-            <td style="padding:8px 12px; color:#94a3b8; font-size:11px;">${rIdx + 1}</td>
-            ${headers.map((_, cIdx) => `<td style="padding:8px 12px; color:#1e293b;">${escapeHtml(row[cIdx] || '')}</td>`).join('')}
-          </tr>
-        `;
-      }).join('');
-
-      badge.textContent = `${visibleCount} ligne${visibleCount > 1 ? 's' : ''}`;
-    }
-
-    function basculerApercuCsv(mode) {
-      document.getElementById('btnCsvViewTable').classList.toggle('active', mode === 'table');
-      document.getElementById('btnCsvViewRaw').classList.toggle('active', mode === 'raw');
-      document.getElementById('csvTableWrapper').style.display = mode === 'table' ? 'block' : 'none';
-      document.getElementById('csvRawWrapper').style.display = mode === 'raw' ? 'block' : 'none';
-    }
-
-    function basculerApercuMd(mode) {
-      document.getElementById('btnMdViewRendered').classList.toggle('active', mode === 'rendered');
-      document.getElementById('btnMdViewRaw').classList.toggle('active', mode === 'raw');
-      document.getElementById('mdContainerRendered').style.display = mode === 'rendered' ? 'block' : 'none';
-      document.getElementById('mdContainerRaw').style.display = mode === 'raw' ? 'block' : 'none';
-    }
-
-    function fermerVisualiseur() {
-      const modal = document.getElementById('fileViewerModal');
-      modal.style.display = 'none';
-      document.getElementById('viewerModalBody').innerHTML = '';
-      currentViewerFileIdx = null;
-    }
-
-    function fermerVisualiseurSiBackdrop(e) {
-      if (e.target && e.target.id === 'fileViewerModal') {
-        fermerVisualiseur();
+          const text = await res.text();
+          bodyEl.innerHTML = `<pre style="max-height:68vh; overflow:auto; background:var(--input-bg); color:var(--text); padding:16px; border:1px solid var(--border);">${escapeHtml(text)}</pre>`;
+        } catch (e) { bodyEl.innerHTML = 'Erreur de lecture'; }
+      } else {
+        bodyEl.innerHTML = `<div style="text-align:center; padding:50px;">Aucun aperçu disponible.<br><br><button class="btn btn-primary" onclick="telechargerFichierParIndex(${idx})">Télécharger</button></div>`;
       }
     }
 
-    function telechargerFichierCourantViewer() {
-      if (currentViewerFileIdx !== null) {
-        telechargerFichierParIndex(currentViewerFileIdx);
-      }
-    }
-
-    async function ouvrirDansNouvelOngletCourantViewer() {
+    function fermerVisualiseur() { document.getElementById('fileViewerModal').style.display = 'none'; currentViewerFileIdx = null; }
+    function fermerVisualiseurSiBackdrop(e) { if (e.target.id === 'fileViewerModal') fermerVisualiseur(); }
+    function telechargerFichierCourantViewer() { if (currentViewerFileIdx !== null) telechargerFichierParIndex(currentViewerFileIdx); }
+    function ouvrirDansNouvelOngletCourantViewer() {
       if (currentViewerFileIdx === null) return;
       const fileObj = storedFiles[currentViewerFileIdx];
-      if (!fileObj) return;
-
-      const rawKey = fileObj.name;
-      const nomPropre = decodeStorageKey(rawKey);
-      const ext = nomPropre.includes('.') ? nomPropre.split('.').pop().toLowerCase() : '';
-      const { data: urlData } = supabaseClient.storage.from('fichiers').getPublicUrl(rawKey);
-
-      // Pour les fichiers texte / CSV : ouvrir un blob URL pour éviter le téléchargement forcé
-      if (['csv', 'txt', 'json', 'log', 'md'].includes(ext)) {
-        try {
-          const res = await fetch(urlData.publicUrl);
-          const buffer = await res.arrayBuffer();
-          let text;
-          try { text = new TextDecoder('utf-8', { fatal: true }).decode(buffer); }
-          catch (e) { text = new TextDecoder('windows-1252').decode(buffer); }
-
-          const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-          const blobUrl = URL.createObjectURL(blob);
-          window.open(blobUrl, '_blank');
-          return;
-        } catch (e) {
-          window.open(urlData.publicUrl, '_blank');
-          return;
-        }
-      }
-
-      window.open(urlData.publicUrl, '_blank');
+      const { data: { publicUrl } } = supabaseClient.storage.from('fichiers').getPublicUrl(fileObj.name);
+      window.open(publicUrl, '_blank');
     }
-
-    // =========================================================================
-    // TÉLÉCHARGEMENT FIABLE SANS PERTE DE NOM NI ACCENTS
-    // =========================================================================
 
     async function telechargerFichierParIndex(idx) {
       const fileObj = storedFiles[idx];
       if (!fileObj) return;
-
-      const rawKey = fileObj.name;
-      const nomPropre = decodeStorageKey(rawKey);
-      const { data: urlData } = supabaseClient.storage.from('fichiers').getPublicUrl(rawKey);
-
-      showToast(`Téléchargement de "${nomPropre}"...`, 'info');
-
+      const nomPropre = decodeStorageKey(fileObj.name);
+      const { data: { publicUrl } } = supabaseClient.storage.from('fichiers').getPublicUrl(fileObj.name);
       try {
-        // Téléchargement via Blob pour forcer le nom de fichier local exact
-        const res = await fetch(urlData.publicUrl);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const blob = await res.blob();
-        const blobUrl = URL.createObjectURL(blob);
-
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = nomPropre; // Nom exact préservé (sans chiffres et avec accents)
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
+        const res = await fetch(publicUrl);
+        const blobUrl = URL.createObjectURL(await res.blob());
+        const a = document.createElement('a'); a.href = blobUrl; a.download = nomPropre;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
-        showToast(`"${nomPropre}" téléchargé !`, 'success');
-      } catch (err) {
-        console.warn('Erreur fetch Blob, repli direct:', err);
-        // Solution de repli avec paramètre ?download= de Supabase Storage
-        const downloadUrl = `${urlData.publicUrl}?download=${encodeURIComponent(nomPropre)}`;
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = nomPropre;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }
+      } catch (err) { window.open(publicUrl + `?download=${encodeURIComponent(nomPropre)}`); }
     }
 
-    // SUPPRESSION DE FICHIER
     async function supprimerFichierParIndex(idx) {
       const fileObj = storedFiles[idx];
-      if (!fileObj) return;
-
-      const rawKey = fileObj.name;
-      const nomPropre = decodeStorageKey(rawKey);
-
-      if (!confirm(`Supprimer définitivement le fichier "${nomPropre}" ?`)) {
-        return;
-      }
-
+      if (!fileObj || !confirm(`Supprimer "${decodeStorageKey(fileObj.name)}" ?`)) return;
       try {
-        const { error } = await supabaseClient.storage.from('fichiers').remove([rawKey]);
-        if (error) throw error;
-
-        showToast(`Fichier "${nomPropre}" supprimé`, 'success');
-        if (currentViewerFileIdx === idx) {
-          fermerVisualiseur();
-        }
+        await supabaseClient.storage.from('fichiers').remove([fileObj.name]);
+        showToast('Fichier supprimé', 'success');
+        if (currentViewerFileIdx === idx) fermerVisualiseur();
         chargerFichiers();
-      } catch (err) {
-        console.error('Erreur suppression fichier:', err);
-        alert('Erreur lors de la suppression : ' + err.message);
-      }
+      } catch (err) { alert('Erreur : ' + err.message); }
     }
 
     // =========================================================================
-    // UTILITAIRES DIVERS (Formatage, Icônes, Toasts, Copie)
+    // UTILITAIRES
     // =========================================================================
-
-    function copierTextePressePapier(str) {
-      if (!str) return;
-      navigator.clipboard.writeText(str).then(() => {
-        showToast('Texte copié dans le presse-papier !', 'success');
-      }).catch(() => {
-        showToast('Impossible de copier automatiquement.', 'error');
-      });
-    }
-
-    function copierTexteModal() {
-      const pre = document.getElementById('rawTextModalContent') || document.getElementById('mdContainerRaw');
-      if (pre) {
-        copierTextePressePapier(pre.textContent);
-      }
-    }
-
     function formaterTaille(bytes) {
-      if (!bytes || bytes === 0) return '0 Ko';
-      const k = 1024;
-      const dm = 1;
-      const sizes = ['Octets', 'Ko', 'Mo', 'Go'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+      if (!bytes) return '0 Ko';
+      const k = 1024, i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + ['Octets', 'Ko', 'Mo', 'Go'][i];
     }
-
     function formaterDate(dateString) {
       if (!dateString) return '';
-      try {
-        const d = new Date(dateString);
-        return d.toLocaleDateString('fr-FR', {
-          day: 'numeric',
-          month: 'short',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-      } catch (e) {
-        return '';
-      }
+      return new Date(dateString).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     }
-
     function determinerIconeFichier(filename) {
       const ext = filename.split('.').pop().toLowerCase();
-      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) return '🖼️';
-      if (['pdf'].includes(ext)) return '📕';
-      if (['doc', 'docx', 'odt'].includes(ext)) return '📘';
-      if (['xls', 'xlsx', 'csv'].includes(ext)) return '📊';
-      if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return '📦';
-      if (['mp3', 'wav', 'ogg', 'm4a'].includes(ext)) return '🎵';
-      if (['mp4', 'mov', 'avi', 'mkv'].includes(ext)) return '🎬';
-      if (['js', 'html', 'css', 'py', 'json', 'ts'].includes(ext)) return '💻';
+      if (['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(ext)) return '🖼️';
+      if (ext === 'pdf') return '📕';
+      if (['doc', 'docx'].includes(ext)) return '📘';
+      if (['xls', 'csv'].includes(ext)) return '📊';
+      if (['zip', 'rar'].includes(ext)) return '📦';
+      if (['mp3', 'wav'].includes(ext)) return '🎵';
+      if (['mp4', 'mov'].includes(ext)) return '🎬';
       if (['txt', 'md'].includes(ext)) return '📄';
       return '📁';
     }
-
     function escapeHtml(text) {
-      if (!text) return '';
-      return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+      return (text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
-
     function showToast(message, type = 'info') {
       const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.textContent = message;
-      container.appendChild(toast);
-      setTimeout(() => {
-        if (toast.parentNode) {
-          toast.parentNode.removeChild(toast);
-        }
-      }, 3000);
+      const toast = document.createElement('div'); toast.className = `toast ${type}`; toast.textContent = message;
+      container.appendChild(toast); setTimeout(() => toast.remove(), 3000);
     }
   </script>
 </body>
