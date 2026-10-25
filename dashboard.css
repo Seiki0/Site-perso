@@ -20,16 +20,12 @@
 
 .dash-empty-state { grid-column: 1 / -1; }
 
-.dash-main h1,
-.dash-main h2,
-.dash-main h3,
-.dash-main p {
-  margin: 0;
-}
+.dash-main p { margin: 0; }
 
 .dash-main h1,
 .dash-main h2,
 .dash-main h3 {
+  margin: 0;
   font-size: inherit;
   font-weight: inherit;
 }
@@ -65,10 +61,10 @@
 .dash-grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
 .dash-grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .dash-items-center { align-items: center; }
-.dash-justify-between { justify-content: space-between; }
+
 .dash-justify-center { justify-content: center; }
 .dash-text-center { text-align: center; }
-.dash-shrink-0 { flex-shrink: 0; }
+
 .dash-relative { position: relative; }
 .dash-absolute { position: absolute; }
 .dash-overflow-hidden { overflow: hidden; }
@@ -85,13 +81,13 @@
 .dash-w-16 { width: 4rem; }
 .dash-w-6 { width: 1.5rem; }
 .dash-w-5 { width: 1.25rem; }
-.dash-p-2 { padding: 0.5rem; }
+
 .dash-p-4 { padding: 1rem; }
 .dash-p-5 { padding: 1.25rem; }
 .dash-p-8 { padding: 2rem; }
-.dash-px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
-.dash-px-8 { padding-left: 2rem; padding-right: 2rem; }
-.dash-py-0-5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+
+
+
 .dash-pb-24 { padding-bottom: 6rem; }
 .dash-pr-6 { padding-right: 1.5rem; }
 .dash-mb-2 { margin-bottom: 0.5rem; }
@@ -102,17 +98,17 @@
 .dash-right-4 { right: 1rem; }
 .dash-right-6 { right: 1.5rem; }
 .dash-bottom-6 { bottom: 1.5rem; }
-.dash-gap-2 { gap: 0.5rem; }
-.dash-gap-3 { gap: 0.75rem; }
+
+
 .dash-gap-6 { gap: 1.5rem; }
 .dash-space-y-10 > :not([hidden]) ~ :not([hidden]) { margin-top: 2.5rem; }
-.dash-rounded { border-radius: 0.25rem; }
+
 .dash-rounded-lg { border-radius: 0.5rem; }
 .dash-rounded-xl { border-radius: 0.75rem; }
 .dash-rounded-full { border-radius: 9999px; }
 .dash-border { border: 1px solid var(--border); }
 .dash-border-2 { border-width: 2px; border-style: solid; }
-.dash-border-b { border-bottom-width: 1px; border-bottom-style: solid; }
+
 .dash-cursor-pointer { cursor: pointer; }
 .dash-font-medium { font-weight: 500; }
 .dash-font-semibold { font-weight: 600; }
@@ -121,23 +117,22 @@
 .dash-text-sm { font-size: 0.875rem; line-height: 1.25rem; }
 .dash-text-lg { font-size: 1.125rem; line-height: 1.75rem; }
 .dash-text-xl { font-size: 1.25rem; line-height: 1.75rem; }
-.dash-text-2xl { font-size: 1.5rem; line-height: 2rem; }
+
 .dash-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dash-line-clamp-2,
 .dash-line-clamp-3 {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.dash-line-clamp-2 { -webkit-line-clamp: 2; }
+
 .dash-line-clamp-3 { -webkit-line-clamp: 3; }
 .dash-object-cover { object-fit: cover; }
-.dash-opacity-20 { opacity: 0.2; }
+
 .dash-opacity-80 { opacity: 0.8; }
 .dash-stroke-current { stroke: currentColor; }
 .dash-theme-transition { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
 .dash-transition-all { transition: all 0.2s ease; }
-.dash-transition-colors { transition: color 0.2s ease, background-color 0.2s ease; }
+
 .dash-transition-transform { transition: transform 0.2s ease; }
 .dash-shadow-sm { box-shadow: var(--shadow-sm); }
 .dash-shadow-lg { box-shadow: var(--shadow-md); }
@@ -147,19 +142,19 @@
 .dash-bg-app-primary { background-color: var(--primary); }
 .dash-border-app-border { border-color: var(--border); }
 .dash-border-app-primary { border-color: var(--primary); }
-.dash-border-app-muted { border-color: var(--text-muted); }
+
 .dash-text-app-text { color: var(--text); }
 .dash-text-app-muted { color: var(--text-muted); }
 .dash-text-app-primary { color: var(--primary); }
 .dash-text-white { color: var(--bg); }
-.dash-bg-emerald-500-10 { background-color: rgba(16, 185, 129, 0.1); }
-.dash-text-emerald-500 { color: #10b981; }
+
+
 .dash-bg-rose-500-10 { background-color: rgba(244, 63, 94, 0.1); }
 .dash-text-rose-500 { color: #f43f5e; }
-.dash-text-blue-400 { color: #60a5fa; }
 
-.dash-hover-text-app-text:hover { color: var(--text); }
-.dash-hover-bg-app-hover:hover { background-color: var(--border); }
+
+
+
 .dash-hover-bg-app-primary-hover:hover { filter: brightness(0.9); }
 .dash-hover-border-app-muted:hover { border-color: var(--text-muted); }
 .dash-hover-shadow-md:hover { box-shadow: var(--shadow-md); }
