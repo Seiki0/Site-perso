@@ -216,6 +216,29 @@
       box-sizing: border-box;
     }
 
+    #editorBodyContainer.split #noteContentTextarea,
+    #editorBodyContainer.split .markdown-preview {
+      display: block;
+      width: 50%;
+      min-width: 0;
+      flex: 1 1 0;
+    }
+
+    #editorBodyContainer.preview-only #noteContentTextarea {
+      display: none;
+    }
+
+    #editorBodyContainer.preview-only .markdown-preview {
+      display: block;
+      width: 100%;
+      border-left: 0;
+    }
+
+    .editor-mode-button.active {
+      color: var(--color-primary);
+      background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    }
+
     /* MARKDOWN PREVIEW STYLING */
     .markdown-preview h1, .markdown-preview h2, .markdown-preview h3, .markdown-preview h4 {
       margin-top: 1.2em;
