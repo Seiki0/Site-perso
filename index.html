@@ -89,6 +89,7 @@
 
 
         /* Icones utilitaires */
+        svg.stroke-current { fill: none; }
         .ui-icon { width: 1.25em; height: 1.25em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: middle; }
         .file-type-svg { width: 2em; height: 2em; }
 
@@ -156,6 +157,7 @@
         <symbol id="ui-icon-video" viewBox="0 0 24 24"><rect x="2" y="5" width="15" height="14" rx="2"></rect><path d="m17 10 5-3v10l-5-3zM8 9l5 3-5 3z"></path></symbol>
         <symbol id="ui-icon-archive" viewBox="0 0 24 24"><path d="M3 4h18v4H3zM5 8v12h14V8m-9 4h4"></path></symbol>
         <symbol id="ui-icon-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 10h18M9 4v16m6-16v16"></path></symbol>
+        <symbol id="ui-icon-compressed" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><path d="M12 8v2m0 2v2m0 2v2m-1-7h2m-2 4h2"></path></symbol>
         <symbol id="ui-icon-design" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18h1.5a2.5 2.5 0 0 0 1.7-4.3 1.5 1.5 0 0 1 1-2.7H18a3 3 0 0 0 3-3c0-4.4-4-8-9-8z"></path></symbol>
         <symbol id="ui-icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></symbol>
         <symbol id="ui-icon-refresh" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></symbol>
@@ -218,7 +220,7 @@
     <aside id="appSidebar" class="w-64 h-full bg-app-sidebar border-r border-app-border flex flex-col shrink-0 theme-transition absolute md:relative z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
         <!-- Logo -->
         <div class="h-16 flex items-center px-6 gap-3 mb-2 mt-2 group cursor-pointer" onclick="switchMainTab('dashboard')">
-            <svg class="w-8 h-8 shrink-0 transition-transform group-hover:scale-105" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg class="w-10 h-10 shrink-0 transition-transform group-hover:scale-105" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M4 10C4 6.68629 6.68629 4 10 4H18V18H4V10Z" fill="#2dd4bf"/>
                 <path d="M22 4H30C33.3137 4 36 6.68629 36 10V18H22V4Z" fill="#14b8a6"/>
                 <path d="M4 22H18V36H10C6.68629 36 4 33.3137 4 30V22Z" fill="#0d9488"/>
@@ -257,10 +259,14 @@
                 <div class="flex items-center gap-3"><svg class="w-5 h-5 stroke-current group-hover:text-app-primary transition-colors" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Fichiers</div>
                 <span class="text-xs font-semibold bg-app-hover px-2 py-0.5 rounded-full" id="sidebarFilesCount">0</span>
             </button>
+            <button id="navItemTrash" onclick="switchMainTab('trash')" class="w-full flex items-center justify-between px-3 py-2 text-app-muted hover:bg-app-hover hover:text-app-text font-medium rounded-lg transition-colors group">
+                <span class="flex items-center gap-3"><svg class="w-5 h-5 stroke-current group-hover:text-app-primary transition-colors" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Corbeille</span>
+                <span class="text-xs font-semibold bg-app-hover px-2 py-0.5 rounded-full" id="sidebarTrashCount">0</span>
+            </button>
 
-            <div class="pt-4 pb-1 px-3"><span class="text-xs font-semibold text-app-muted uppercase tracking-wider">Notes Épinglées</span></div>
+            <div class="pt-4 pb-1 px-3"><span class="text-xs font-semibold text-app-muted uppercase tracking-wider">Notes Favoris</span></div>
             <div id="sidebarFavoritesList" class="px-2 pb-2">
-                <div class="text-xs text-app-muted px-2 py-1 italic">Aucune note épinglée</div>
+                <div class="text-xs text-app-muted px-2 py-1 italic">Aucune note favorite</div>
             </div>
 
             <div class="pt-2 pb-1 px-3"><span class="text-xs font-semibold text-app-muted uppercase tracking-wider">Fichiers Favoris</span></div>
@@ -278,7 +284,9 @@
             <button class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-app-muted hover:bg-app-hover hover:text-app-text rounded-lg transition-colors group sidebar-filter-btn" data-file-filter="doc" onclick="switchMainTab('files'); filtrerFichiersParCategorie('doc');">
                 <svg class="w-4 h-4 stroke-current text-app-primary" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg> Documents
             </button>
-<button class="sidebar-filter-btn w-full flex items-center gap-3 px-3 py-1.5 text-sm text-app-muted" data-file-filter="archive" onclick="switchMainTab('files'); filtrerFichiersParCategorie('archive');">Archives</button><button class="sidebar-filter-btn w-full flex items-center gap-3 px-3 py-1.5 text-sm text-app-muted" data-file-filter="favorites" onclick="switchMainTab('files'); filtrerFichiersParCategorie('favorites');">Favoris partagés</button>
+            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-app-muted hover:bg-app-hover hover:text-app-text rounded-lg transition-colors group sidebar-filter-btn" data-file-filter="compressed" onclick="switchMainTab('files'); filtrerFichiersParCategorie('compressed');">
+                <svg class="w-4 h-4 stroke-current text-app-primary" viewBox="0 0 24 24"><use href="#ui-icon-compressed"></use></svg> Fichiers compressés
+            </button>
         </nav>
 
         <!-- Bas Sidebar -->
@@ -334,16 +342,15 @@
 
             <template id="dashNoteCardTemplate">
               <article class="dash-bg-app-card dash-border dash-border-app-border dash-hover-border-app-muted dash-rounded-xl dash-p-5 dash-cursor-pointer dash-transition-all dash-hover-shadow-md dash-relative dash-theme-transition" tabindex="0" role="button">
-                <div class="dash-absolute dash-top-4 dash-right-4 dash-text-app-primary" data-dash-slot="pin" hidden>
-                  <svg class="dash-w-5 dash-h-5 dash-stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                </div>
+                <button class="dash-favorite-action" type="button" data-dash-slot="favorite" aria-label="Ajouter aux favoris" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
                 <h3 class="dash-font-bold dash-text-app-text dash-mb-2 dash-pr-6 dash-truncate" data-dash-slot="title"></h3>
                 <p class="dash-text-sm dash-text-app-muted dash-line-clamp-3 dash-mb-4" data-dash-slot="preview"></p>
                 <div class="dash-text-xs dash-text-app-muted dash-font-medium" data-dash-slot="date"></div>
               </article>
             </template>
             <template id="dashFileCardTemplate">
-              <article class="dash-bg-app-card dash-border dash-border-app-border dash-hover-border-app-muted dash-rounded-xl dash-p-4 dash-flex dash-flex-col dash-items-center dash-text-center dash-cursor-pointer dash-transition-all dash-hover-shadow-md dash-theme-transition" tabindex="0" role="button">
+              <article class="dash-bg-app-card dash-border dash-border-app-border dash-hover-border-app-muted dash-rounded-xl dash-p-4 dash-flex dash-flex-col dash-items-center dash-text-center dash-cursor-pointer dash-transition-all dash-hover-shadow-md dash-theme-transition dash-relative" tabindex="0" role="button">
+                <button class="dash-favorite-action" type="button" data-dash-slot="favorite" aria-label="Ajouter aux favoris" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
                 <div class="dash-w-full dash-h-20 dash-bg-app-border dash-rounded-lg dash-mb-3 dash-overflow-hidden" data-dash-slot="image-preview" hidden>
                   <img class="dash-w-full dash-h-full dash-object-cover dash-opacity-80" alt="Aperçu du fichier">
                 </div>
@@ -398,6 +405,16 @@
             </div>
         </div>
 
+        <div id="tabContentTrash" class="tab-content flex-1 flex-col overflow-y-auto p-4 md:p-8 space-y-6 pb-24">
+            <section class="bg-app-card border border-app-border rounded-xl shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-app-border flex items-center justify-between bg-app-sidebar">
+                    <h2 class="font-bold text-app-text">Corbeille <span class="text-sm font-medium text-app-muted" id="trashCount">0 élément</span></h2>
+                    <span class="text-xs text-app-muted">La suppression définitive se fait depuis cette vue.</span>
+                </div>
+                <div class="trash-list" id="trashListContainer"></div>
+            </section>
+        </div>
+
         <!-- 2.C TAB: NOTES (Liste + Editor Panel inclus ici pour Desktop) -->
         <div id="tabContentNotes" class="tab-content flex-1 h-full flex overflow-hidden">
             <!-- Colonne Liste de Notes -->
@@ -430,7 +447,7 @@
                             <span class="save-status-icon" id="saveStatusIcon"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg></span>
                             <span id="saveStatusText">Enregistré</span>
                         </div>
-                        <button class="p-2 text-app-muted hover:text-app-primary hover:bg-app-hover rounded-lg transition-colors" id="pinActiveNoteBtn" onclick="togglePinActiveNote()"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
+                        <button class="p-2 text-app-muted hover:text-app-primary hover:bg-app-hover rounded-lg transition-colors" id="pinActiveNoteBtn" onclick="togglePinActiveNote()" title="Ajouter aux favoris" aria-label="Ajouter aux favoris" aria-pressed="false"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
 <button id="noteFullscreenBtn" class="p-2 text-app-muted hover:text-app-primary rounded-lg" onclick="toggleNoteFullscreen()" title="Plein écran" aria-label="Passer la note en plein écran" aria-pressed="false"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3"></path></svg></button>
                         <button class="p-2 text-app-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors" onclick="supprimerNoteActive()"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                     </div>
@@ -539,12 +556,14 @@
     }
 
     let notes = [];
+    let allNotes = [];
     let isLoadingNotes = false;
     let notesLoadError = false;
     let activeNote = null;
     let autoSaveTimer = null;
     let currentViewMode = 'edit';
     let storedFiles = [];
+    let allStoredFiles = [];
     let currentViewerFileIdx = null;
     let selectedFileIdx = null;
     let activeMainTab = 'notes';
@@ -553,6 +572,236 @@
     let commandPaletteItems = [];
     let commandPaletteSelectedIndex = 0;
     const pendingDeletions = new Map();
+    let trashItems = [];
+    let trashLoaded = false;
+    let trashLoadAttempted = false;
+    let trashLoadPromise = null;
+
+    function itemEstDansCorbeille(type, key) {
+      return trashItems.some(item => item.item_type === type && item.item_key === String(key));
+    }
+
+    function suppressionEnCours(type, key) {
+      return pendingDeletions.has(`${type}:${key}`);
+    }
+
+    function synchroniserVuesAvecCorbeille() {
+      notes = allNotes.filter(note => !itemEstDansCorbeille('note', note.id) && !suppressionEnCours('note', note.id));
+      storedFiles = allStoredFiles.filter(file => !itemEstDansCorbeille('file', file.name) && !suppressionEnCours('file', file.name));
+      if (activeNote && !notes.some(note => note.id === activeNote.id)) {
+        activeNote = notes[0] || null;
+        afficherNoteActive();
+      }
+      const notesCount = document.getElementById('sidebarNotesCount');
+      const notesBadge = document.getElementById('notesListTitleBadge');
+      const filesCount = document.getElementById('sidebarFilesCount');
+      const filesBadge = document.getElementById('filesCountBadge');
+      if (notesCount) notesCount.textContent = notes.length;
+      if (notesBadge) notesBadge.textContent = `${notes.length} note${notes.length > 1 ? 's' : ''}`;
+      if (filesCount) filesCount.textContent = storedFiles.length;
+      if (filesBadge) filesBadge.textContent = `${storedFiles.length} fichier${storedFiles.length > 1 ? 's' : ''}`;
+      if (document.getElementById('notesListContainer')) afficherListeNotes(document.getElementById('noteSearchInput').value);
+      if (document.getElementById('filesListContainer')) {
+        mettreAJourFavorisFichiersSidebar();
+        afficherFichiers();
+      }
+      if (document.getElementById('sidebarFavoritesList')) mettreAJourFavorisSidebar();
+      afficherTableauDeBord();
+    }
+
+    async function chargerCorbeille(force = false) {
+      if (!supabaseClient) return false;
+      if (trashLoaded && !force) return true;
+      if (trashLoadAttempted && !force && !trashLoaded) return false;
+      if (trashLoadPromise) return trashLoadPromise;
+
+      trashLoadAttempted = true;
+      trashLoadPromise = (async () => {
+        try {
+          const { data, error } = await supabaseClient
+            .from('trash_items')
+            .select('id,item_type,item_key,deleted_at')
+            .order('deleted_at', { ascending: false });
+          if (error) throw error;
+          trashItems = data || [];
+          trashLoaded = true;
+          document.getElementById('sidebarTrashCount').textContent = trashItems.length;
+          synchroniserVuesAvecCorbeille();
+          afficherCorbeille();
+          return true;
+        } catch (err) {
+          trashLoaded = false;
+          console.error('Erreur chargement corbeille:', err);
+          showToast('Corbeille indisponible. Vérifiez le script SQL Supabase.', 'error');
+          return false;
+        } finally {
+          trashLoadPromise = null;
+        }
+      })();
+      return trashLoadPromise;
+    }
+
+    async function enregistrerElementCorbeille(type, key) {
+      if (!trashLoaded) throw new Error('La corbeille n’est pas disponible.');
+      const { data, error } = await supabaseClient
+        .from('trash_items')
+        .upsert({ item_type: type, item_key: String(key) }, { onConflict: 'item_type,item_key' })
+        .select('id,item_type,item_key,deleted_at')
+        .single();
+      if (error) throw error;
+      const existingIndex = trashItems.findIndex(item => item.item_type === type && item.item_key === String(key));
+      if (existingIndex < 0) trashItems.unshift(data);
+      else trashItems[existingIndex] = data;
+      document.getElementById('sidebarTrashCount').textContent = trashItems.length;
+      afficherCorbeille();
+    }
+
+    async function retirerElementCorbeille(type, key) {
+      const { error } = await supabaseClient
+        .from('trash_items')
+        .delete()
+        .eq('item_type', type)
+        .eq('item_key', String(key));
+      if (error) throw error;
+      trashItems = trashItems.filter(item => !(item.item_type === type && item.item_key === String(key)));
+      document.getElementById('sidebarTrashCount').textContent = trashItems.length;
+      afficherCorbeille();
+    }
+
+    function afficherCorbeille() {
+      const container = document.getElementById('trashListContainer');
+      if (!container) return;
+      const count = document.getElementById('trashCount');
+      if (count) count.textContent = `${trashItems.length} élément${trashItems.length === 1 ? '' : 's'}`;
+      if (!trashLoaded) {
+        container.innerHTML = '<div class="empty-state">La corbeille Supabase est indisponible.</div>';
+        return;
+      }
+      if (trashItems.length === 0) {
+        container.innerHTML = '<div class="empty-state">La corbeille est vide.</div>';
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+      trashItems.forEach(item => {
+        const isNote = item.item_type === 'note';
+        const savedItem = isNote
+          ? allNotes.find(note => String(note.id) === item.item_key)
+          : allStoredFiles.find(file => file.name === item.item_key);
+        const title = savedItem
+          ? (isNote ? (savedItem.titre || 'Sans titre') : decodeStorageKey(savedItem.name))
+          : 'Élément introuvable';
+        const card = document.createElement('article');
+        card.className = 'trash-item-card';
+
+        const details = document.createElement('div');
+        details.className = 'trash-item-details';
+        const heading = document.createElement('div');
+        heading.className = 'trash-item-title';
+        heading.textContent = title;
+        const meta = document.createElement('div');
+        meta.className = 'trash-item-meta';
+        meta.textContent = `${isNote ? 'Note' : 'Fichier'} · Mis à la corbeille ${formaterDateRelative(item.deleted_at)}`;
+        details.append(heading, meta);
+
+        const actions = document.createElement('div');
+        actions.className = 'trash-item-actions';
+        const restoreButton = document.createElement('button');
+        restoreButton.type = 'button';
+        restoreButton.disabled = !savedItem;
+        restoreButton.appendChild(document.createElement('span'));
+        restoreButton.firstElementChild.innerHTML = renderUiIcon('refresh');
+        restoreButton.appendChild(document.createTextNode('Restaurer'));
+        restoreButton.addEventListener('click', () => restaurerElementCorbeille(item));
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'trash-delete-button';
+        deleteButton.innerHTML = `${renderUiIcon('trash')}<span>Supprimer définitivement</span>`;
+        deleteButton.addEventListener('click', () => supprimerDefinitivementCorbeille(item, deleteButton));
+        actions.append(restoreButton, deleteButton);
+        card.append(details, actions);
+        fragment.appendChild(card);
+      });
+      container.replaceChildren(fragment);
+    }
+
+    async function restaurerElementCorbeille(item) {
+      const isNote = item.item_type === 'note';
+      const savedItem = isNote
+        ? allNotes.find(note => String(note.id) === item.item_key)
+        : allStoredFiles.find(file => file.name === item.item_key);
+      if (!savedItem) {
+        showToast('Cet élément est introuvable et ne peut pas être restauré.', 'error');
+        return;
+      }
+
+      try {
+        await retirerElementCorbeille(item.item_type, item.item_key);
+        if (isNote) {
+          if (!notes.some(note => note.id === savedItem.id)) notes.push(savedItem);
+          document.getElementById('sidebarNotesCount').textContent = notes.length;
+          document.getElementById('notesListTitleBadge').textContent = `${notes.length} note${notes.length > 1 ? 's' : ''}`;
+          afficherListeNotes(document.getElementById('noteSearchInput').value);
+          mettreAJourFavorisSidebar();
+          switchMainTab('notes');
+          selectionnerNote(savedItem.id);
+        } else {
+          if (!storedFiles.some(file => file.name === savedItem.name)) storedFiles.push(savedItem);
+          document.getElementById('sidebarFilesCount').textContent = storedFiles.length;
+          document.getElementById('filesCountBadge').textContent = `${storedFiles.length} fichier${storedFiles.length > 1 ? 's' : ''}`;
+          mettreAJourFavorisFichiersSidebar();
+          afficherFichiers();
+          switchMainTab('files');
+        }
+        afficherTableauDeBord();
+      } catch (err) {
+        console.error('Erreur restauration corbeille:', err);
+        showToast('Impossible de restaurer cet élément.', 'error');
+      }
+    }
+
+    async function supprimerDefinitivementCorbeille(item, button) {
+      button.disabled = true;
+      try {
+        if (item.item_type === 'note') {
+          const { error } = await supabaseClient.from('ma_table_mobile').delete().eq('id', item.item_key);
+          if (error) throw error;
+          allNotes = allNotes.filter(note => String(note.id) !== item.item_key);
+          notes = notes.filter(note => String(note.id) !== item.item_key);
+          pinnedNoteIds.delete(item.item_key);
+          localStorage.setItem('app-pinned-notes', JSON.stringify([...pinnedNoteIds]));
+          document.getElementById('sidebarNotesCount').textContent = notes.length;
+          document.getElementById('notesListTitleBadge').textContent = `${notes.length} note${notes.length > 1 ? 's' : ''}`;
+          if (activeNote && String(activeNote.id) === item.item_key) {
+            activeNote = notes[0] || null;
+            afficherNoteActive();
+          }
+          afficherListeNotes(document.getElementById('noteSearchInput').value);
+          mettreAJourFavorisSidebar();
+        } else {
+          const { error } = await supabaseClient.storage.from('fichiers').remove([item.item_key]);
+          if (error) throw error;
+          allStoredFiles = allStoredFiles.filter(file => file.name !== item.item_key);
+          storedFiles = storedFiles.filter(file => file.name !== item.item_key);
+          sharedFavoriteFileKeys.delete(item.item_key);
+          if (sharedFavoritesLoaded) {
+            const favoriteResult = await supabaseClient.from('shared_file_favorites').delete().eq('file_key', item.item_key);
+            if (favoriteResult.error) console.error('Erreur suppression du favori du fichier:', favoriteResult.error);
+          }
+          document.getElementById('sidebarFilesCount').textContent = storedFiles.length;
+          document.getElementById('filesCountBadge').textContent = `${storedFiles.length} fichier${storedFiles.length > 1 ? 's' : ''}`;
+          mettreAJourFavorisFichiersSidebar();
+          afficherFichiers();
+        }
+        await retirerElementCorbeille(item.item_type, item.item_key);
+        afficherTableauDeBord();
+      } catch (err) {
+        console.error('Erreur suppression définitive:', err);
+        showToast('Impossible de supprimer définitivement cet élément.', 'error');
+        button.disabled = false;
+      }
+    }
 
     /* =========================================================================
        GESTION DES THEMES DYNAMIQUES
@@ -582,16 +831,17 @@
     function switchMainTab(tabName) {
       if (tabName !== 'notes') quitterPleinEcranNote();
       activeMainTab=tabName;
-      ['notes','files','dashboard'].forEach(tab=>{
+      ['notes','files','dashboard','trash'].forEach(tab=>{
         const name=tab[0].toUpperCase()+tab.slice(1), nav=document.getElementById('navItem'+name), bottom=document.getElementById('bnav'+name), content=document.getElementById('tabContent'+name);
         if(nav){const selected=tab===tabName; nav.classList.toggle('text-app-text',selected); nav.classList.toggle('bg-app-hover',selected); nav.classList.toggle('text-app-muted',!selected); nav.classList.toggle('active',selected); const icon=nav.querySelector('svg'); if(icon) icon.classList.toggle('text-app-primary',selected);}
         if(bottom){bottom.classList.toggle('text-app-primary',tab===tabName); bottom.classList.toggle('active',tab===tabName);}
         if(content){content.classList.toggle('active',tab===tabName&&tab!=='dashboard');content.classList.toggle('dash-active',tab===tabName&&tab==='dashboard');}
       });
-      const fab=document.getElementById('fabAdd'); if(fab) fab.style.display=tabName==='dashboard'?'none':'';
+      const fab=document.getElementById('fabAdd'); if(fab) fab.style.display=tabName==='notes'||tabName==='files'?'':'none';
       const stats=document.getElementById('dashStats'); if(stats) stats.classList.toggle('hidden',tabName!=='dashboard');
       if(tabName==='dashboard') afficherTableauDeBord();
-      const titles={notes:'Mes Notes',files:'Fichiers',dashboard:'Tableau de bord'}, icons={notes:'notes',files:'folder',dashboard:'grid'};
+      if(tabName==='trash') chargerCorbeille(true).then(afficherCorbeille);
+      const titles={notes:'Mes Notes',files:'Fichiers',dashboard:'Tableau de bord',trash:'Corbeille'}, icons={notes:'notes',files:'folder',dashboard:'grid',trash:'trash'};
       document.getElementById('breadcrumbTitle').innerHTML=`<svg class="w-6 h-6 stroke-current text-app-primary" viewBox="0 0 24 24"><use href="#ui-icon-${icons[tabName]}"></use></svg><span>${titles[tabName]}</span>`;
       toggleMobileSidebar(false); fermerEditeurMobile();
     }
@@ -675,17 +925,19 @@
             card.querySelector('[data-dash-slot="title"]').textContent = title;
             card.querySelector('[data-dash-slot="preview"]').textContent = preview;
             card.querySelector('[data-dash-slot="date"]').textContent = `Modifié ${formaterDateRelative(obtenirDateModification(note))}`;
-            card.querySelector('[data-dash-slot="pin"]').hidden = !isPinned;
-            if (isPinned) {
-              card.classList.remove('dash-border', 'dash-border-app-border', 'dash-hover-border-app-muted', 'dash-transition-all', 'dash-hover-shadow-md');
-              card.classList.add('dash-border-2', 'dash-border-app-primary', 'dash-shadow-sm');
-            }
+            const favoriteButton = card.querySelector('[data-dash-slot="favorite"]');
+            favoriteButton.classList.toggle('is-favorite', isPinned);
+            favoriteButton.setAttribute('aria-pressed', String(isPinned));
+            favoriteButton.setAttribute('aria-label', isPinned ? 'Retirer des favoris' : 'Ajouter aux favoris');
+            favoriteButton.title = isPinned ? 'Retirer des favoris' : 'Ajouter aux favoris';
+            favoriteButton.addEventListener('click', event => togglePinNote(note.id, event));
             const openNote = () => {
               switchMainTab('notes');
               selectionnerNote(note.id);
             };
             card.addEventListener('click', openNote);
             card.addEventListener('keydown', event => {
+              if (event.target.closest('button')) return;
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
                 openNote();
@@ -716,12 +968,22 @@
             const extension = fileName.includes('.') ? fileName.split('.').pop().toUpperCase().slice(0, 5) : 'FILE';
             const fileIndex = storedFiles.indexOf(file);
             const fileSize = Number(file.metadata && file.metadata.size);
+            const isFavorite = sharedFavoriteFileKeys.has(file.name);
             card.querySelector('[data-dash-slot="extension"]').textContent = extension;
             card.querySelector('[data-dash-slot="name"]').textContent = fileName;
             card.querySelector('[data-dash-slot="size"]').textContent =
               Number.isFinite(fileSize) && fileSize >= 0 ? formatBytes(fileSize) : 'Taille inconnue';
             card.querySelector('[data-dash-slot="date"]').textContent =
               `Modifié ${formaterDateRelative(obtenirDateModification(file))}`;
+            const favoriteButton = card.querySelector('[data-dash-slot="favorite"]');
+            favoriteButton.classList.toggle('is-favorite', isFavorite);
+            favoriteButton.setAttribute('aria-pressed', String(isFavorite));
+            favoriteButton.setAttribute('aria-label', isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris');
+            favoriteButton.title = isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris';
+            favoriteButton.addEventListener('click', event => {
+              event.stopPropagation();
+              toggleSharedFileFavorite(fileIndex, favoriteButton);
+            });
             if (/\.(?:gif|jpe?g|png|webp|svg)$/i.test(fileName)) {
               const preview = card.querySelector('[data-dash-slot="image-preview"]');
               preview.hidden = false;
@@ -734,6 +996,7 @@
             };
             card.addEventListener('click', openFile);
             card.addEventListener('keydown', event => {
+              if (event.target.closest('button')) return;
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
                 openFile();
@@ -854,21 +1117,35 @@
       textSpan.textContent = message;
       toast.appendChild(textSpan);
 
+      let timeoutId = null;
+      let countdownInterval = null;
       if (action && action.text && action.onClick) {
         const btn = document.createElement('button');
-        btn.className = 'toast-action-btn';
+        btn.className = `toast-action-btn${action.danger ? ' toast-action-danger' : ''}`;
         btn.textContent = action.text;
         btn.onclick = () => {
+          clearTimeout(timeoutId);
+          clearInterval(countdownInterval);
           action.onClick();
           toast.remove();
         };
         toast.appendChild(btn);
+        if (action.countdown) {
+          const deadline = Date.now() + action.countdown;
+          const updateCountdown = () => {
+            const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+            btn.textContent = `${action.text} (${remaining}s)`;
+          };
+          updateCountdown();
+          countdownInterval = setInterval(updateCountdown, 200);
+        }
       }
 
       container.appendChild(toast);
       const duration = action ? (action.duration || 5000) : 3200;
 
-      const timeoutId = setTimeout(() => {
+      timeoutId = setTimeout(() => {
+        clearInterval(countdownInterval);
         toast.style.animation = 'fadeOut 0.25s ease forwards';
         setTimeout(() => toast.remove(), 250);
       }, duration);
@@ -876,6 +1153,7 @@
       return {
         dismiss: () => {
           clearTimeout(timeoutId);
+          clearInterval(countdownInterval);
           toast.remove();
         }
       };
@@ -901,6 +1179,7 @@
 
     async function chargerNotes() {
       if (!supabaseClient) return;
+      await chargerCorbeille();
       isLoadingNotes = true;
       notesLoadError = false;
       afficherTableauDeBord();
@@ -912,17 +1191,22 @@
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        notes = data || [];
+        allNotes = data || [];
+        notes = allNotes.filter(note => !itemEstDansCorbeille('note', note.id));
         document.getElementById('sidebarNotesCount').textContent = notes.length;
         document.getElementById('notesListTitleBadge').textContent = `${notes.length} note${notes.length > 1 ? 's' : ''}`;
         afficherListeNotes();
         mettreAJourFavorisSidebar();
+        afficherCorbeille();
 
         const savedNoteId = localStorage.getItem('active_note_id');
         if (savedNoteId && notes.some(n => n.id === savedNoteId)) {
           selectionnerNote(savedNoteId);
         } else if (notes.length > 0) {
           selectionnerNote(notes[0].id);
+        } else if (allNotes.length > 0) {
+          activeNote = null;
+          afficherNoteActive();
         } else {
           creerNouvelleNote('Bienvenue dans votre Espace Pro', '# Bienvenue\n\nCeci est votre nouveau bloc-notes Pro.\n\n- Ouvrez la palette globale avec **Ctrl+K**.\n- Glissez des images ou fichiers directement ici.\n- Vos modifications sont sauvegardées en temps réel sur Supabase.');
         }
@@ -969,9 +1253,9 @@
           <div class="note-card-wrapper" data-note-id="${n.id}">
             <div class="note-card ${isActive ? 'active' : ''}" onclick="selectionnerNote('${n.id}')">
               <div class="note-card-header">
-                <div class="note-card-title">${isPinned ? renderUiIcon('pin', 'note-pin-icon') : ''}${escapeHtml(titre)}</div>
+                <div class="note-card-title">${escapeHtml(titre)}</div>
                 <div class="note-card-actions">
-                  <button class="btn-card-action ${isPinned ? 'pinned' : ''}" title="${isPinned ? 'Désépingler' : 'Épingler'}" aria-label="${isPinned ? 'Désépingler' : 'Épingler'}" onclick="togglePinNote('${n.id}', event)">
+                  <button type="button" class="btn-card-action ${isPinned ? 'pinned' : ''}" title="${isPinned ? 'Retirer des favoris' : 'Ajouter aux favoris'}" aria-label="${isPinned ? 'Retirer des favoris' : 'Ajouter aux favoris'}" aria-pressed="${isPinned}" onclick="togglePinNote('${n.id}', event)">
                     <svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-pin"></use></svg>
                   </button>
                   <button class="btn-card-action danger" title="Supprimer" aria-label="Supprimer" onclick="supprimerNote('${n.id}', event)"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-trash"></use></svg></button>
@@ -991,7 +1275,7 @@
       const container = document.getElementById('sidebarFavoritesList');
       const pinnedList = notes.filter(n => pinnedNoteIds.has(n.id));
       if (pinnedList.length === 0) {
-        container.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:4px 12px;">Aucune note épinglée</div>';
+        container.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:4px 12px;">Aucune note favorite</div>';
         return;
       }
       container.innerHTML = pinnedList.map(n => `
@@ -1005,10 +1289,10 @@
       if (event) event.stopPropagation();
       if (pinnedNoteIds.has(noteId)) {
         pinnedNoteIds.delete(noteId);
-        showToast('Note désépinglée', 'info');
+        showToast('Note retirée des favoris', 'info');
       } else {
         pinnedNoteIds.add(noteId);
-        showToast('Note épinglée en haut', 'success');
+        showToast('Note ajoutée aux favoris', 'success');
       }
       localStorage.setItem('app-pinned-notes', JSON.stringify([...pinnedNoteIds]));
       afficherListeNotes(document.getElementById('noteSearchInput').value);
@@ -1028,8 +1312,10 @@
       if (!btn || !activeNote) return;
       const isPinned = pinnedNoteIds.has(activeNote.id);
       btn.classList.toggle('pinned', isPinned);
-      btn.title = isPinned ? 'Désépingler' : 'Épingler';
+      btn.disabled = false;
+      btn.title = isPinned ? 'Retirer des favoris' : 'Ajouter aux favoris';
       btn.setAttribute('aria-label', btn.title);
+      btn.setAttribute('aria-pressed', String(isPinned));
       btn.style.color = isPinned ? '#eab308' : 'var(--text-muted)';
     }
 
@@ -1090,6 +1376,15 @@
         textarea.value = '';
         titleInput.disabled = true;
         textarea.disabled = true;
+        const pinButton = document.getElementById('pinActiveNoteBtn');
+        if (pinButton) {
+          pinButton.disabled = true;
+          pinButton.classList.remove('pinned');
+          pinButton.setAttribute('aria-pressed', 'false');
+          pinButton.title = 'Ajouter aux favoris';
+          pinButton.setAttribute('aria-label', pinButton.title);
+          pinButton.style.color = 'var(--text-muted)';
+        }
         mettreAJourStatsTexte();
         return;
       }
@@ -1117,6 +1412,7 @@
 
         if (error) throw error;
         if (data && data[0]) {
+          allNotes.unshift(data[0]);
           notes.unshift(data[0]);
           afficherTableauDeBord();
           document.getElementById('sidebarNotesCount').textContent = notes.length;
@@ -1205,16 +1501,22 @@
       if (event) event.stopPropagation();
       const foundIdx = notes.findIndex(n => n.id === noteId);
       if (foundIdx === -1) return;
+      if (!trashLoaded) {
+        showToast('La corbeille n’est pas disponible. La suppression a été annulée.', 'error');
+        return;
+      }
 
       const noteToDelete = notes[foundIdx];
-
+      const wasActive = activeNote && activeNote.id === noteId;
+      const pendingKey = `note:${noteId}`;
+      if (pendingDeletions.has(pendingKey)) return;
+      const pendingDeletion = { timer: null };
+      pendingDeletions.set(pendingKey, pendingDeletion);
       notes.splice(foundIdx, 1);
-      pinnedNoteIds.delete(noteId);
-      localStorage.setItem('app-pinned-notes', JSON.stringify([...pinnedNoteIds]));
       document.getElementById('sidebarNotesCount').textContent = notes.length;
       document.getElementById('notesListTitleBadge').textContent = `${notes.length} note${notes.length > 1 ? 's' : ''}`;
 
-      if (activeNote && activeNote.id === noteId) {
+      if (wasActive) {
         activeNote = notes.length > 0 ? notes[0] : null;
         afficherNoteActive();
       }
@@ -1222,33 +1524,51 @@
       mettreAJourFavorisSidebar();
       afficherTableauDeBord();
 
-      const deleteTimer = setTimeout(async () => {
-        pendingDeletions.delete(noteId);
+      (async () => {
         try {
-          await supabaseClient.from('ma_table_mobile').delete().eq('id', noteId);
+          await enregistrerElementCorbeille('note', noteId);
+          pendingDeletion.timer = setTimeout(() => pendingDeletions.delete(pendingKey), 5000);
+          showToast(`Note "${(noteToDelete.titre || 'Sans titre').slice(0, 16)}" déplacée dans la corbeille`, 'info', {
+            text: 'Annuler',
+            countdown: 5000,
+            duration: 5000,
+            danger: true,
+            onClick: async () => {
+              clearTimeout(pendingDeletion.timer);
+              try {
+                await retirerElementCorbeille('note', noteId);
+                pendingDeletions.delete(pendingKey);
+                notes.push(noteToDelete);
+                document.getElementById('sidebarNotesCount').textContent = notes.length;
+                document.getElementById('notesListTitleBadge').textContent = `${notes.length} note${notes.length > 1 ? 's' : ''}`;
+                if (wasActive) selectionnerNote(noteToDelete.id);
+                afficherListeNotes(document.getElementById('noteSearchInput').value);
+                mettreAJourFavorisSidebar();
+                afficherTableauDeBord();
+                showToast('Suppression annulée', 'success');
+              } catch (err) {
+                pendingDeletions.delete(pendingKey);
+                console.error('Erreur annulation de mise à la corbeille:', err);
+                showToast('Impossible d’annuler ; la note reste dans la corbeille.', 'error');
+              }
+            }
+          });
         } catch (err) {
-          console.error('Erreur suppression:', err);
-        }
-      }, 5000);
-
-      pendingDeletions.set(noteId, deleteTimer);
-
-      showToast(`Note "${(noteToDelete.titre || 'Sans titre').slice(0, 16)}" supprimée`, 'info', {
-        text: 'Annuler (5s)',
-        duration: 5000,
-        onClick: () => {
-          clearTimeout(deleteTimer);
-          pendingDeletions.delete(noteId);
-          notes.splice(foundIdx, 0, noteToDelete);
+          pendingDeletions.delete(pendingKey);
+          console.error('Erreur mise à la corbeille de la note:', err);
+          notes.push(noteToDelete);
+          if (wasActive) {
+            activeNote = noteToDelete;
+            afficherNoteActive();
+          }
           document.getElementById('sidebarNotesCount').textContent = notes.length;
           document.getElementById('notesListTitleBadge').textContent = `${notes.length} note${notes.length > 1 ? 's' : ''}`;
-          selectionnerNote(noteToDelete.id);
           afficherListeNotes(document.getElementById('noteSearchInput').value);
           mettreAJourFavorisSidebar();
           afficherTableauDeBord();
-          showToast('Suppression annulée', 'success');
+          showToast('Impossible de déplacer la note dans la corbeille.', 'error');
         }
-      });
+      })();
     }
 
     /* =========================================================================
@@ -1483,7 +1803,8 @@
         png: 'image', jpg: 'image', jpeg: 'image', gif: 'image', webp: 'image',
         svg: 'design', mp3: 'audio', wav: 'audio', ogg: 'audio',
         mp4: 'video', mov: 'video', webm: 'video',
-        zip: 'archive', rar: 'archive', '7z': 'archive', tar: 'archive', gz: 'archive',
+        zip: 'compressed', rar: 'compressed', '7z': 'compressed', tar: 'compressed', gz: 'compressed',
+        bz2: 'compressed', xz: 'compressed', zst: 'compressed',
         txt: 'file', md: 'notes', ppt: 'file', pptx: 'file'
       };
       return renderUiIcon(iconNames[ext] || 'file', 'file-type-svg');
@@ -1536,6 +1857,7 @@
         document.getElementById('sharedFavoritesNotice').hidden = true;
         mettreAJourFavorisFichiersSidebar();
         afficherFichiers();
+        afficherTableauDeBord();
       } catch (err) {
         sharedFavoritesLoaded = false;
         console.error('Erreur chargement des favoris de fichiers:', err);
@@ -1595,6 +1917,7 @@
 
     async function chargerFichiers() {
       if (isLoadingFiles) return;
+      await chargerCorbeille();
       if (!supabaseClient) {
         showToast('Impossible d’actualiser : Supabase est indisponible.', 'error');
         return;
@@ -1616,10 +1939,12 @@
           sortBy: { column: 'created_at', order: 'desc' }
         });
         if (error) throw error;
-        storedFiles = (data || []).filter(f => f.name !== '.emptyFolderPlaceholder');
+        allStoredFiles = (data || []).filter(f => f.name !== '.emptyFolderPlaceholder');
+        storedFiles = allStoredFiles.filter(file => !itemEstDansCorbeille('file', file.name));
         filesLoadError = false;
         await chargerFavorisFichiers();
         mettreAJourFavorisFichiersSidebar();
+        afficherCorbeille();
         document.getElementById('sidebarFilesCount').textContent = storedFiles.length;
         document.getElementById('filesCountBadge').textContent = `${storedFiles.length} fichier${storedFiles.length > 1 ? 's' : ''}`;
         afficherFichiers();
@@ -1668,7 +1993,7 @@
         const extensionsMap = {
           image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
           doc: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'md', 'csv', 'ppt', 'pptx'],
-          archive: ['zip', 'rar', '7z', 'tar', 'gz']
+          compressed: ['zip', 'rar', '7z', 'tar', 'gz', 'bz2', 'xz', 'zst']
         };
         const allowedExts = extensionsMap[activeFileFilter] || [];
         filesToDisplay = filesTriees.filter(f => {
@@ -1746,6 +2071,7 @@
         else sharedFavoriteFileKeys.add(file.name);
         mettreAJourFavorisFichiersSidebar();
         afficherFichiers();
+        afficherTableauDeBord();
       } catch (err) {
         console.error('Erreur mise à jour favori de fichier:', err);
         showToast('Impossible de modifier ce favori partagé.', 'error');
@@ -1844,9 +2170,17 @@
     function supprimerFichierParIndex(idx) {
       const fileObj = storedFiles[idx];
       if (!fileObj) return;
+      if (!trashLoaded) {
+        showToast('La corbeille n’est pas disponible. La suppression a été annulée.', 'error');
+        return;
+      }
 
       const fileName = fileObj.name;
       const displayName = decodeStorageKey(fileName);
+      const pendingKey = `file:${fileName}`;
+      if (pendingDeletions.has(pendingKey)) return;
+      const pendingDeletion = { timer: null };
+      pendingDeletions.set(pendingKey, pendingDeletion);
 
       storedFiles.splice(idx, 1);
       mettreAJourFavorisFichiersSidebar();
@@ -1856,32 +2190,46 @@
       afficherFichiers();
       afficherTableauDeBord();
 
-      const deleteTimer = setTimeout(async () => {
-        pendingDeletions.delete(fileName);
+      (async () => {
         try {
-          await supabaseClient.storage.from('fichiers').remove([fileName]);
+          await enregistrerElementCorbeille('file', fileName);
+          pendingDeletion.timer = setTimeout(() => pendingDeletions.delete(pendingKey), 5000);
+          showToast(`Fichier "${displayName.slice(0, 16)}" déplacé dans la corbeille`, 'info', {
+            text: 'Annuler',
+            countdown: 5000,
+            duration: 5000,
+            danger: true,
+            onClick: async () => {
+              clearTimeout(pendingDeletion.timer);
+              try {
+                await retirerElementCorbeille('file', fileName);
+                pendingDeletions.delete(pendingKey);
+                storedFiles.splice(Math.min(idx, storedFiles.length), 0, fileObj);
+                mettreAJourFavorisFichiersSidebar();
+                document.getElementById('sidebarFilesCount').textContent = storedFiles.length;
+                document.getElementById('filesCountBadge').textContent = `${storedFiles.length} fichier${storedFiles.length > 1 ? 's' : ''}`;
+                afficherFichiers();
+                afficherTableauDeBord();
+                showToast('Suppression annulée', 'success');
+              } catch (err) {
+                pendingDeletions.delete(pendingKey);
+                console.error('Erreur annulation de mise à la corbeille:', err);
+                showToast('Impossible d’annuler ; le fichier reste dans la corbeille.', 'error');
+              }
+            }
+          });
         } catch (err) {
-          console.error('Erreur suppression finale fichier:', err);
-        }
-      }, 5000);
-
-      pendingDeletions.set(fileName, deleteTimer);
-
-      showToast(`Fichier "${displayName.slice(0, 16)}" supprimé`, 'info', {
-        text: 'Annuler (5s)',
-        duration: 5000,
-        onClick: () => {
-          clearTimeout(deleteTimer);
-          pendingDeletions.delete(fileName);
-          storedFiles.splice(idx, 0, fileObj);
-          mettreAJourFavorisFichiersSidebar();
+          pendingDeletions.delete(pendingKey);
+          console.error('Erreur mise à la corbeille du fichier:', err);
+          storedFiles.splice(Math.min(idx, storedFiles.length), 0, fileObj);
           document.getElementById('sidebarFilesCount').textContent = storedFiles.length;
           document.getElementById('filesCountBadge').textContent = `${storedFiles.length} fichier${storedFiles.length > 1 ? 's' : ''}`;
+          mettreAJourFavorisFichiersSidebar();
           afficherFichiers();
           afficherTableauDeBord();
-          showToast('Suppression annulée', 'success');
+          showToast('Impossible de déplacer le fichier dans la corbeille.', 'error');
         }
-      });
+      })();
     }
 
     /* =========================================================================
@@ -2032,8 +2380,10 @@
       setFilesViewMode(filesViewMode);
 
       if (supabaseClient) {
-        chargerNotes();
-        chargerFichiers();
+        chargerCorbeille().then(() => {
+          chargerNotes();
+          chargerFichiers();
+        });
       }
 
       // GESTION GLOBALE DES TOUCHES

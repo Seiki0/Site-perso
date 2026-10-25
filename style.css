@@ -921,6 +921,8 @@ button:focus-visible {
   color: #eab308;
 }
 
+#pinActiveNoteBtn.pinned .ui-icon { fill: currentColor; }
+
 .btn-card-action.danger:hover,
 .btn-file-delete:hover {
   border-color: var(--danger-light);
@@ -1001,9 +1003,60 @@ button:focus-visible {
   color: #fff;
 }
 
+.toast-action-btn.toast-action-danger {
+  border-color: var(--danger);
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.toast-action-btn.toast-action-danger:hover {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #fff;
+}
+
+.trash-list {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.trash-item-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card-bg);
+}
+
+.trash-item-details { min-width: 0; }
+.trash-item-title { overflow: hidden; color: var(--text); font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.trash-item-meta { margin-top: 4px; color: var(--text-muted); font-size: 12px; }
+.trash-item-actions { display: flex; flex-shrink: 0; gap: 8px; }
+.trash-item-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+}
+.trash-item-actions button:hover { border-color: var(--primary); color: var(--primary); }
+.trash-item-actions .trash-delete-button:hover { border-color: var(--danger); color: var(--danger); }
+.trash-item-actions .ui-icon { width: 16px; height: 16px; }
+
 
 
 @media (max-width: 768px) {
+  .trash-item-card { align-items: flex-start; flex-direction: column; }
+  .trash-item-actions { width: 100%; }
+  .trash-item-actions button { flex: 1; justify-content: center; }
 
 
 
@@ -1111,6 +1164,7 @@ button:focus-visible {
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+  flex-direction: column;
 }
 
 .note-card:hover {
@@ -1127,6 +1181,8 @@ button:focus-visible {
 }
 
 .note-card-title {
+  min-width: 0;
+  flex: 1;
   font-size: 14px;
   font-weight: 600;
   color: var(--text);
@@ -1135,6 +1191,23 @@ button:focus-visible {
   text-overflow: ellipsis;
   margin-bottom: 4px;
 }
+
+.note-card-header {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.note-card-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+}
+
+.note-card-actions .btn-card-action { width: 30px; height: 30px; padding: 6px; }
 
 .note-card.active .note-card-title { color: var(--text); }
 
