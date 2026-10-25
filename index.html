@@ -1,231 +1,466 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MémoSquare : Notes & Fichiers</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235b5bd6' stroke-width='2'%3E%3Cpath d='M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7'/%3E%3Cpath d='m18.5 2.5 3 3L12 15l-4 1 1-4z'/%3E%3C/svg%3E">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MémoSquare : Notes & Fichiers</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230d9488' stroke-width='2'%3E%3Cpath d='M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7'/%3E%3Cpath d='m18.5 2.5 3 3L12 15l-4 1 1-4z'/%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Scripts Externes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Configuration Tailwind et Thèmes dynamiques -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        app: {
+                            bg: 'var(--color-bg)',
+                            sidebar: 'var(--color-sidebar)',
+                            surface: 'var(--color-surface)',
+                            border: 'var(--color-border)',
+                            text: 'var(--color-text)',
+                            muted: 'var(--color-muted)',
+                            primary: 'var(--color-primary)',
+                            'primary-hover': 'var(--color-primary-hover)',
+                            hover: 'var(--color-hover)',
+                            card: 'var(--color-card)',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        /* =========================================
+           THÈMES (Variables CSS)
+           ========================================= */
+        :root {
+            --color-bg: #0b1121;
+            --color-sidebar: #111827;
+            --color-surface: #1f2937;
+            --color-card: #1f2937;
+            --color-border: #374151;
+            --color-text: #f3f4f6;
+            --color-muted: #9ca3af;
+            --color-primary: #0d9488;
+            --color-primary-hover: #14b8a6;
+            --color-hover: #374151;
+        }
+
+        [data-theme="notion"] {
+            --color-bg: #ffffff;
+            --color-sidebar: #f7f7f5;
+            --color-surface: #ffffff;
+            --color-card: #ffffff;
+            --color-border: #e9e9e7;
+            --color-text: #37352f;
+            --color-muted: #787774;
+            --color-primary: #0f766e;
+            --color-primary-hover: #115e59;
+            --color-hover: #efefef;
+        }
+
+        /* Styles globaux */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            flex-direction: row;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }
+
+        .theme-transition { transition: all 0.3s ease; }
+        .editor-content:focus { outline: none; }
+
+        /* Icones utilitaires */
+        .ui-icon { width: 1.25em; height: 1.25em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: middle; }
+        .file-type-svg { width: 2em; height: 2em; }
+
+        /* Tab Content */
+        .tab-content:not(.active) { display: none !important; }
+        .tab-content.active { display: flex !important; }
+        .tab-content#tabContentNotes.active { flex-direction: row; }
+
+        /* Animation Save */
+        @keyframes popSuccess { 0% { transform: scale(0.8); } 50% { transform: scale(1.35); } 100% { transform: scale(1); } }
+        @keyframes pulseSave { 0%, 100% { opacity: 0.4; transform: rotate(0deg); } 50% { opacity: 1; transform: rotate(180deg); } }
+        .save-status-icon { display: inline-block; transition: transform 0.2s ease; }
+        .save-status-icon.pop { color: #10b981; animation: popSuccess 0.4s ease forwards; }
+        .save-status-icon.saving { color: var(--color-primary); animation: pulseSave 0.8s infinite ease-in-out; }
+
+        /* Overlays & Modals */
+        .modal-overlay { background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px); }
+        .command-palette-overlay { background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(5px); }
+        .global-drop-overlay { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(10px); } }
+        .toast { animation: fadeIn 0.25s ease; }
+
+        /* Markdown Preview Styles */
+        .markdown-preview h1, .markdown-preview h2, .markdown-preview h3 { font-weight: 700; color: var(--color-text); margin-top: 1.5em; margin-bottom: 0.5em; }
+        .markdown-preview h1 { font-size: 1.875rem; }
+        .markdown-preview h2 { font-size: 1.5rem; }
+        .markdown-preview h3 { font-size: 1.25rem; }
+        .markdown-preview p { margin-bottom: 1em; }
+        .markdown-preview ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+        .markdown-preview ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1em; }
+        .markdown-preview blockquote { border-left: 4px solid var(--color-primary); padding-left: 1rem; color: var(--color-muted); font-style: italic; margin-bottom: 1em; }
+        .markdown-preview a { color: var(--color-primary); text-decoration: underline; }
+        .markdown-preview code { background: var(--color-hover); padding: 0.2em 0.4em; border-radius: 0.25rem; font-family: monospace; font-size: 0.875em; }
+        .markdown-preview pre { background: var(--color-sidebar); padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1em; }
+        .markdown-preview pre code { background: transparent; padding: 0; color: #e5e7eb; }
+
+        .editor-split .note-textarea { width: 50%; border-right: 1px solid var(--color-border); }
+        .editor-split .markdown-preview { display: block; width: 50%; padding-left: 1.5rem; }
+        .editor-preview .note-textarea { display: none; }
+        .editor-preview .markdown-preview { display: block; width: 100%; }
+
+        .markdown-preview { display: none; overflow-y: auto; height: 100%; }
+
+        /* Mobile specific fixes */
+        @media (max-width: 768px) {
+            .right-editor-panel { display: none !important; }
+            .right-editor-panel.mobile-active { display: flex !important; position: fixed; inset: 0; width: 100%; z-index: 50; }
+        }
+    </style>
 </head>
-<body>
-  <svg class="icon-definitions" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-    <symbol id="ui-icon-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"></path></symbol>
-    <symbol id="ui-icon-notes" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></symbol>
-    <symbol id="ui-icon-folder" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></symbol>
-    <symbol id="ui-icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></symbol>
-    <symbol id="ui-icon-theme" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"></rect><path d="M6 10v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4M12 16v6"></path></symbol>
-    <symbol id="ui-icon-add" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M12 8v8M8 12h8"></path></symbol>
-    <symbol id="ui-icon-pin" viewBox="0 0 24 24"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></symbol>
-    <symbol id="ui-icon-trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></symbol>
-    <symbol id="ui-icon-back" viewBox="0 0 24 24"><path d="M19 12H5m7 7-7-7 7-7"></path></symbol>
-    <symbol id="ui-icon-bold" viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 0 1 0 8H6zM6 12h9a4 4 0 0 1 0 8H6z"></path></symbol>
-    <symbol id="ui-icon-italic" viewBox="0 0 24 24"><path d="M19 4h-9M14 20H5m10-16-6 16"></path></symbol>
-    <symbol id="ui-icon-strike" viewBox="0 0 24 24"><path d="M16 4h-4a4 4 0 0 0 0 8h4a4 4 0 0 1 0 8h-4M4 12h16"></path></symbol>
-    <symbol id="ui-icon-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"></path></symbol>
-    <symbol id="ui-icon-h1" viewBox="0 0 24 24"><path d="M4 12h8M4 18V6M12 18V6M17 12l2-2v8"></path></symbol>
-    <symbol id="ui-icon-h2" viewBox="0 0 24 24"><path d="M4 12h8M4 18V6M12 18V6M17 11a2 2 0 1 1 4 0c0 2-4 5-4 7h4"></path></symbol>
-    <symbol id="ui-icon-h3" viewBox="0 0 24 24"><path d="M4 12h8M4 18V6M12 18V6M17 10h3.5L19 14h1.5a2 2 0 1 1 0 4H17"></path></symbol>
-    <symbol id="ui-icon-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"></path><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"></circle></symbol>
-    <symbol id="ui-icon-quote" viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1zM15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path></symbol>
-    <symbol id="ui-icon-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></symbol>
-    <symbol id="ui-icon-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></symbol>
-    <symbol id="ui-icon-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></symbol>
-    <symbol id="ui-icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72 1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></symbol>
-    <symbol id="ui-icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></symbol>
-    <symbol id="ui-icon-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></symbol>
-    <symbol id="ui-icon-refresh" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></symbol>
-    <symbol id="ui-icon-close" viewBox="0 0 24 24"><path d="m18 6-12 12M6 6l12 12"></path></symbol>
-    <symbol id="ui-icon-cloud-upload" viewBox="0 0 24 24"><path d="M20 16.2A5 5 0 0 0 18 6.4 7 7 0 0 0 4.3 9 4.5 4.5 0 0 0 5 18h3"></path><path d="m12 12-4 4m4-4 4 4m-4-4v9"></path></symbol>
-    <symbol id="ui-icon-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="m21 15-5-5L5 21"></path></symbol>
-    <symbol id="ui-icon-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6M8 13h8m-8 4h8"></path></symbol>
-    <symbol id="ui-icon-archive" viewBox="0 0 24 24"><path d="M3 4h18v4H3zM5 8v12h14V8m-9 4h4"></path></symbol>
-    <symbol id="ui-icon-audio" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></symbol>
-    <symbol id="ui-icon-video" viewBox="0 0 24 24"><rect x="2" y="5" width="15" height="14" rx="2"></rect><path d="m17 10 5-3v10l-5-3zM8 9l5 3-5 3z"></path></symbol>
-    <symbol id="ui-icon-design" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18h1.5a2.5 2.5 0 0 0 1.7-4.3 1.5 1.5 0 0 1 1-2.7H18a3 3 0 0 0 3-3c0-4.4-4-8-9-8z"></path><circle cx="7.5" cy="10" r="1"></circle><circle cx="11" cy="7.5" r="1"></circle><circle cx="15" cy="9" r="1"></circle></symbol>
-    <symbol id="ui-icon-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 10h18M9 4v16m6-16v16"></path></symbol>
-    <symbol id="ui-icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></symbol>
-    <symbol id="ui-icon-maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3"></path></symbol>
-    <symbol id="ui-icon-minimize" viewBox="0 0 24 24"><path d="M8 3v5H3m13-5v5h5M3 16h5v5m13-5h-5v5"></path></symbol>
-  </svg>
+<body class="h-screen w-full flex flex-row overflow-hidden selection:bg-app-primary selection:text-white relative">
 
-  <div class="global-drop-overlay" id="globalDropOverlay">
-    <div class="global-drop-box">
-      <div class="drop-icon"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-cloud-upload"></use></svg></div>
-      <h2 style="font-size: 1.3rem; margin: 0;">Déposez vos fichiers ici</h2>
-      <p style="color: var(--text-muted); font-size: 14px; margin: 0;">Ils seront automatiquement uploadés dans votre bibliothèque.</p>
+    <!-- Definitions SVG -->
+    <svg class="hidden" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <symbol id="ui-icon-notes" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></symbol>
+        <symbol id="ui-icon-folder" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></symbol>
+        <symbol id="ui-icon-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></symbol>
+        <symbol id="ui-icon-pin" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></symbol>
+        <symbol id="ui-icon-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></symbol>
+        <symbol id="ui-icon-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6M8 13h8m-8 4h8"></path></symbol>
+        <symbol id="ui-icon-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="m21 15-5-5L5 21"></path></symbol>
+        <symbol id="ui-icon-audio" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></symbol>
+        <symbol id="ui-icon-video" viewBox="0 0 24 24"><rect x="2" y="5" width="15" height="14" rx="2"></rect><path d="m17 10 5-3v10l-5-3zM8 9l5 3-5 3z"></path></symbol>
+        <symbol id="ui-icon-archive" viewBox="0 0 24 24"><path d="M3 4h18v4H3zM5 8v12h14V8m-9 4h4"></path></symbol>
+        <symbol id="ui-icon-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 10h18M9 4v16m6-16v16"></path></symbol>
+        <symbol id="ui-icon-design" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18h1.5a2.5 2.5 0 0 0 1.7-4.3 1.5 1.5 0 0 1 1-2.7H18a3 3 0 0 0 3-3c0-4.4-4-8-9-8z"></path></symbol>
+        <symbol id="ui-icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></symbol>
+        <symbol id="ui-icon-refresh" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></symbol>
+        <symbol id="ui-icon-close" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></symbol>
+
+        <symbol id="ui-icon-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"></path></symbol>
+        <symbol id="ui-icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></symbol>
+        <symbol id="ui-icon-theme" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"></rect><path d="M6 10v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4M12 16v6"></path></symbol>
+        <symbol id="ui-icon-add" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M12 8v8M8 12h8"></path></symbol>
+        <symbol id="ui-icon-back" viewBox="0 0 24 24"><path d="M19 12H5m7 7-7-7 7-7"></path></symbol>
+        <symbol id="ui-icon-bold" viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 0 1 0 8H6zM6 12h9a4 4 0 0 1 0 8H6z"></path></symbol>
+        <symbol id="ui-icon-italic" viewBox="0 0 24 24"><path d="M19 4h-9M14 20H5m10-16-6 16"></path></symbol>
+        <symbol id="ui-icon-strike" viewBox="0 0 24 24"><path d="M16 4h-4a4 4 0 0 0 0 8h4a4 4 0 0 1 0 8h-4M4 12h16"></path></symbol>
+        <symbol id="ui-icon-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"></path></symbol>
+        <symbol id="ui-icon-h1" viewBox="0 0 24 24"><path d="M4 12h8M4 18V6M12 18V6M17 12l2-2v8"></path></symbol>
+        <symbol id="ui-icon-h2" viewBox="0 0 24 24"><path d="M4 12h8M4 18V6M12 18V6M17 11a2 2 0 1 1 4 0c0 2-4 5-4 7h4"></path></symbol>
+        <symbol id="ui-icon-h3" viewBox="0 0 24 24"><path d="M4 12h8M4 18V6M12 18V6M17 10h3.5L19 14h1.5a2 2 0 1 1 0 4H17"></path></symbol>
+        <symbol id="ui-icon-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"></path><circle cx="3.5" cy="6" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none"></circle></symbol>
+        <symbol id="ui-icon-quote" viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1zM15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path></symbol>
+        <symbol id="ui-icon-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></symbol>
+        <symbol id="ui-icon-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></symbol>
+        <symbol id="ui-icon-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></symbol>
+        <symbol id="ui-icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72 1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></symbol>
+        <symbol id="ui-icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></symbol>
+        <symbol id="ui-icon-cloud-upload" viewBox="0 0 24 24"><path d="M20 16.2A5 5 0 0 0 18 6.4 7 7 0 0 0 4.3 9 4.5 4.5 0 0 0 5 18h3"></path><path d="m12 12-4 4m4-4 4 4m-4-4v9"></path></symbol>
+        <symbol id="ui-icon-maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3"></path></symbol>
+        <symbol id="ui-icon-minimize" viewBox="0 0 24 24"><path d="M8 3v5H3m13-5v5h5M3 16h5v5m13-5h-5v5"></path></symbol>
+    </svg>
+
+    <!-- Global Overlays -->
+    <div class="global-drop-overlay fixed inset-0 z-[9999] hidden flex-col items-center justify-center pointer-events-none border-4 border-dashed border-app-primary m-4 rounded-2xl" id="globalDropOverlay">
+        <div class="bg-app-card p-10 rounded-2xl text-center shadow-2xl flex flex-col items-center border border-app-border">
+            <svg class="w-16 h-16 text-app-primary mb-4 animate-bounce stroke-current" viewBox="0 0 24 24"><path d="M20 16.2A5 5 0 0 0 18 6.4 7 7 0 0 0 4.3 9 4.5 4.5 0 0 0 5 18h3"></path><path d="m12 12-4 4m4-4 4 4m-4-4v9"></path></svg>
+            <h2 class="text-xl font-bold text-app-text mb-2">Déposez vos fichiers ici</h2>
+            <p class="text-sm text-app-muted">Ils seront automatiquement uploadés dans votre bibliothèque.</p>
+        </div>
     </div>
-  </div>
 
-  <div class="command-palette-overlay" id="commandPaletteOverlay" onclick="handlePaletteBackdropClick(event)">
-    <div class="command-palette" onclick="event.stopPropagation()">
-      <div class="command-palette-header">
-        <span class="command-palette-icon"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-search"></use></svg></span>
-        <input type="text" class="command-search-input" id="commandSearchInput" placeholder="Rechercher une note ou un fichier..." oninput="onCommandSearch(this.value)">
-        <span class="command-esc-badge">Echap</span>
-      </div>
-      <div class="command-results-list" id="commandResultsList"></div>
+    <!-- Command Palette (Ctrl+K) -->
+    <div class="command-palette-overlay fixed inset-0 z-[2500] hidden items-start justify-center pt-[14vh]" id="commandPaletteOverlay" onclick="if(event.target===this) fermerCommandPalette()">
+        <div class="w-full max-w-2xl bg-app-card border border-app-border rounded-xl shadow-2xl overflow-hidden transform transition-all">
+            <div class="p-4 border-b border-app-border flex items-center gap-3">
+                <svg class="w-5 h-5 text-app-muted stroke-current" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                <input type="text" id="commandSearchInput" class="flex-1 bg-transparent border-none text-app-text outline-none text-base" placeholder="Rechercher une note ou un fichier..." oninput="onCommandSearch(this.value)">
+                <span class="text-xs font-semibold text-app-muted bg-app-hover px-2 py-1 rounded">Echap</span>
+            </div>
+            <div class="max-h-96 overflow-y-auto p-2 flex flex-col gap-1" id="commandResultsList"></div>
+        </div>
     </div>
-  </div>
 
-  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileSidebar(false)"></div>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[3000] flex flex-col gap-2 w-full max-w-md pointer-events-none px-4"></div>
 
-  <div class="app-shell">
-    <aside class="app-sidebar" id="appSidebar">
-      <div class="sidebar-header">
-        <a href="#" class="brand" onclick="switchMainTab('notes'); return false;">
-          <span class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 40 40" focusable="false">
-              <path d="M4 10a6 6 0 0 1 6-6h8v14H4z" fill="#2dd4bf"></path>
-              <path d="M22 4h8a6 6 0 0 1 6 6v8H22z" fill="#14b8a6"></path>
-              <path d="M4 22h14v14h-8a6 6 0 0 1-6-6z" fill="#0d9488"></path>
-              <path d="M22 22h14v8a6 6 0 0 1-6 6h-8z" fill="#0f766e"></path>
+    <!-- Mobile Sidebar Backdrop -->
+    <div class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" id="sidebarBackdrop" onclick="toggleMobileSidebar(false)"></div>
+
+    <!-- =========================================
+         1. SIDEBAR (Navigation gauche)
+         ========================================= -->
+    <aside id="appSidebar" class="w-64 h-full bg-app-sidebar border-r border-app-border flex flex-col shrink-0 theme-transition absolute md:relative z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-6 gap-3 mb-2 mt-2 group cursor-pointer" onclick="switchMainTab('dashboard')">
+            <svg class="w-8 h-8 shrink-0 transition-transform group-hover:scale-105" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 10C4 6.68629 6.68629 4 10 4H18V18H4V10Z" fill="#2dd4bf"/>
+                <path d="M22 4H30C33.3137 4 36 6.68629 36 10V18H22V4Z" fill="#14b8a6"/>
+                <path d="M4 22H18V36H10C6.68629 36 4 33.3137 4 30V22Z" fill="#0d9488"/>
+                <path d="M22 22H36V30C36 33.3137 33.3137 36 30 36H22V22Z" fill="#0f766e"/>
             </svg>
-          </span>
-          <span class="brand-name">memosquare</span>
-        </a>
-      </div>
-      <button class="sidebar-search-btn" onclick="ouvrirCommandPalette()">
-        <span style="display:flex;align-items:center;gap:8px;"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-search"></use></svg><span>Rechercher...</span></span>
-        <span class="search-shortcut-badge">Ctrl K</span>
-      </button>
-      <button class="sidebar-create-btn" onclick="creerNouvelleNote()"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-add"></use></svg> Créer une note</button>
-      <div class="sidebar-content">
-        <div>
-          <div class="sidebar-section-title">Espace de travail</div>
-          <ul class="sidebar-nav-list">
-            <li>
-              <div class="sidebar-nav-item active" id="navItemNotes" onclick="switchMainTab('notes')">
-                <div class="nav-left"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-notes"></use></svg><span>Mes Notes</span></div>
-                <span class="nav-badge" id="sidebarNotesCount">0</span>
-              </div>
-            </li>
-            <li>
-              <div class="sidebar-nav-item" id="navItemFiles" onclick="switchMainTab('files')">
-                <div class="nav-left"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-folder"></use></svg><span>Fichiers</span></div>
-                <span class="nav-badge" id="sidebarFilesCount">0</span>
-              </div>
-            </li>
-          </ul>
+            <span class="font-black text-2xl tracking-tighter text-app-text">memosquare</span>
         </div>
-        <div>
-          <div class="sidebar-section-title">Notes favoris</div>
-          <div id="sidebarFavoritesList">
-            <div style="font-size:12px;color:var(--text-muted);padding:4px 12px;">Aucune note épinglée</div>
-          </div>
+
+        <div class="px-4 mb-4">
+            <button onclick="ouvrirCommandPalette()" class="w-full flex items-center justify-between px-3 py-2 bg-app-bg border border-app-border text-app-muted rounded-lg text-sm hover:border-app-primary hover:text-app-text transition-colors">
+                <div class="flex items-center gap-2"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg> Rechercher...</div>
+                <span class="text-xs bg-app-hover px-1.5 py-0.5 rounded font-semibold">Ctrl K</span>
+            </button>
         </div>
-        <div>
-          <div class="sidebar-section-title">Fichiers favoris</div>
-          <div id="sidebarFavoriteFilesList">
-            <div class="sidebar-empty-message">Aucun fichier favori</div>
-          </div>
+
+        <!-- Bouton Nouveau -->
+        <div class="px-4 mb-4">
+            <button onclick="creerNouvelleNote()" class="w-full flex items-center justify-center gap-2 bg-app-primary hover:bg-app-primary-hover text-white font-medium py-2.5 px-4 rounded-xl shadow-sm transition-colors theme-transition">
+                <svg class="w-5 h-5 stroke-current" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Créer une note
+            </button>
         </div>
-        <div>
-          <div class="sidebar-section-title">Organisation des fichiers</div>
-          <button type="button" class="sidebar-sub-item sidebar-filter-btn" data-file-filter="all" onclick="switchMainTab('files'); filtrerFichiersParCategorie('all');" aria-pressed="true">
-            <span><svg class="ui-icon sub-icon" aria-hidden="true"><use href="#ui-icon-folder"></use></svg>Tous les fichiers</span>
-          </button>
-          <button type="button" class="sidebar-sub-item sidebar-filter-btn" data-file-filter="favorites" onclick="switchMainTab('files'); filtrerFichiersParCategorie('favorites');" aria-pressed="false">
-            <span><svg class="ui-icon sub-icon" aria-hidden="true"><use href="#ui-icon-pin"></use></svg>Fichiers favoris</span>
-          </button>
-          <button type="button" class="sidebar-sub-item sidebar-filter-btn" data-file-filter="image" onclick="switchMainTab('files'); filtrerFichiersParCategorie('image');" aria-pressed="false">
-            <span><svg class="ui-icon sub-icon" aria-hidden="true"><use href="#ui-icon-image"></use></svg>Images & Photos</span>
-          </button>
-          <button type="button" class="sidebar-sub-item sidebar-filter-btn" data-file-filter="doc" onclick="switchMainTab('files'); filtrerFichiersParCategorie('doc');" aria-pressed="false">
-            <span><svg class="ui-icon sub-icon" aria-hidden="true"><use href="#ui-icon-file"></use></svg>Documents & PDF</span>
-          </button>
-          <button type="button" class="sidebar-sub-item sidebar-filter-btn" data-file-filter="archive" onclick="switchMainTab('files'); filtrerFichiersParCategorie('archive');" aria-pressed="false">
-            <span><svg class="ui-icon sub-icon" aria-hidden="true"><use href="#ui-icon-archive"></use></svg>Archives zip/rar</span>
-          </button>
+
+        <!-- Navigation Principale -->
+        <nav class="flex-1 px-3 space-y-1 overflow-y-auto">
+            <div class="text-xs font-semibold text-app-muted uppercase tracking-wider px-3 mb-2 mt-2">Espace de travail</div>
+            <button id="navItemDashboard" onclick="switchMainTab('dashboard')" class="w-full flex items-center gap-3 px-3 py-2 text-app-muted hover:bg-app-hover hover:text-app-text font-medium rounded-lg transition-colors group">
+                <svg class="w-5 h-5 stroke-current group-hover:text-app-primary transition-colors" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Tableau de bord
+            </button>
+            <button id="navItemNotes" onclick="switchMainTab('notes')" class="w-full flex items-center justify-between px-3 py-2 text-app-text bg-app-hover font-medium rounded-lg theme-transition active:bg-app-primary-light">
+                <div class="flex items-center gap-3"><svg class="w-5 h-5 stroke-current text-app-primary" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> Mes Notes</div>
+                <span class="text-xs font-semibold bg-app-bg px-2 py-0.5 rounded-full" id="sidebarNotesCount">0</span>
+            </button>
+            <button id="navItemFiles" onclick="switchMainTab('files')" class="w-full flex items-center justify-between px-3 py-2 text-app-muted hover:bg-app-hover hover:text-app-text font-medium rounded-lg transition-colors group">
+                <div class="flex items-center gap-3"><svg class="w-5 h-5 stroke-current group-hover:text-app-primary transition-colors" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Fichiers</div>
+                <span class="text-xs font-semibold bg-app-hover px-2 py-0.5 rounded-full" id="sidebarFilesCount">0</span>
+            </button>
+
+            <div class="pt-4 pb-1 px-3"><span class="text-xs font-semibold text-app-muted uppercase tracking-wider">Notes Épinglées</span></div>
+            <div id="sidebarFavoritesList" class="px-2 pb-2">
+                <div class="text-xs text-app-muted px-2 py-1 italic">Aucune note épinglée</div>
+            </div>
+
+            <div class="pt-2 pb-1 px-3"><span class="text-xs font-semibold text-app-muted uppercase tracking-wider">Fichiers Favoris</span></div>
+            <div id="sidebarFavoriteFilesList" class="px-2 pb-2">
+                <div class="text-xs text-app-muted px-2 py-1 italic">Aucun fichier favori</div>
+            </div>
+
+            <div class="pt-2 pb-1 px-3"><span class="text-xs font-semibold text-app-muted uppercase tracking-wider">Filtres Fichiers</span></div>
+            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-app-muted hover:bg-app-hover hover:text-app-text rounded-lg transition-colors group sidebar-filter-btn" data-file-filter="all" onclick="switchMainTab('files'); filtrerFichiersParCategorie('all');">
+                <svg class="w-4 h-4 stroke-current text-app-primary" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Tous
+            </button>
+            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-app-muted hover:bg-app-hover hover:text-app-text rounded-lg transition-colors group sidebar-filter-btn" data-file-filter="image" onclick="switchMainTab('files'); filtrerFichiersParCategorie('image');">
+                <svg class="w-4 h-4 stroke-current text-app-primary" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="m21 15-5-5L5 21"></path></svg> Images
+            </button>
+            <button class="w-full flex items-center gap-3 px-3 py-1.5 text-sm text-app-muted hover:bg-app-hover hover:text-app-text rounded-lg transition-colors group sidebar-filter-btn" data-file-filter="doc" onclick="switchMainTab('files'); filtrerFichiersParCategorie('doc');">
+                <svg class="w-4 h-4 stroke-current text-app-primary" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg> Documents
+            </button>
+<button class="sidebar-filter-btn w-full flex items-center gap-3 px-3 py-1.5 text-sm text-app-muted" data-file-filter="archive" onclick="switchMainTab('files'); filtrerFichiersParCategorie('archive');">Archives</button><button class="sidebar-filter-btn w-full flex items-center gap-3 px-3 py-1.5 text-sm text-app-muted" data-file-filter="favorites" onclick="switchMainTab('files'); filtrerFichiersParCategorie('favorites');">Favoris partagés</button>
+        </nav>
+
+        <!-- Bas Sidebar -->
+        <div class="p-4 border-t border-app-border space-y-4">
+            <button id="themeToggle" class="w-full flex items-center gap-3 px-3 py-2 text-app-muted hover:bg-app-hover hover:text-app-text font-medium rounded-lg transition-colors group">
+                <svg class="w-5 h-5 stroke-current group-hover:text-app-primary transition-colors" viewBox="0 0 24 24"><path d="M17 2v4a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V2"></path><path d="M19 8h-2c-1.1 0-2 .9-2 2v4c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2v-4c0-1.1-.9-2-2-2H1"></path><path d="M12 18v4"></path></svg>
+                <span id="themeText">Thème: Midnight</span>
+            </button>
+            <div class="px-3">
+                <div class="flex items-center gap-2 text-xs font-medium text-app-muted">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]"></span> Cloud Connecté
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="sidebar-footer">
-        <div class="sidebar-theme-row">
-          <span>Thème</span>
-          <div class="theme-switcher">
-            <button class="theme-btn" id="theme-btn-light" onclick="setTheme('light')" title="Notion clair" aria-label="Thème Notion clair"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-sun"></use></svg></button>
-            <button class="theme-btn active" id="theme-btn-dark" onclick="setTheme('dark')" title="Midnight sombre" aria-label="Thème Midnight sombre"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-moon"></use></svg></button>
-          </div>
-        </div>
-        <div class="cloud-status">
-          <span class="cloud-dot"></span>
-          <span>Cloud Supabase Connecté</span>
-        </div>
-      </div>
     </aside>
 
-    <main class="app-main">
-      <header class="app-topbar">
-        <div class="topbar-left">
-          <button class="btn-sidebar-toggle" onclick="toggleMobileSidebar()" title="Menu" aria-label="Menu"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-menu"></use></svg></button>
-          <div class="breadcrumb-title" id="breadcrumbTitle">
-            <svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-notes"></use></svg><span>Mes Notes</span>
-          </div>
+    <!-- =========================================
+         2. MAIN AREA (Contenu central dynamique)
+         ========================================= -->
+    <main class="flex-1 h-full flex flex-col min-w-0 bg-app-bg theme-transition relative">
+        <!-- Topbar Mobile -->
+        <header class="h-16 px-4 md:px-8 flex items-center justify-between border-b border-app-border shrink-0 bg-app-card md:bg-transparent z-10">
+            <div class="flex items-center gap-3">
+                <button class="md:hidden p-2 text-app-muted hover:bg-app-hover rounded-lg" onclick="toggleMobileSidebar(true)"><svg class="w-6 h-6 stroke-current" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
+                <h1 class="text-xl md:text-2xl font-bold text-app-text flex items-center gap-2" id="breadcrumbTitle">
+                    <svg class="w-6 h-6 stroke-current text-app-primary" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> Mes Notes
+                </h1>
+            </div>
+            <span class="hidden text-xs md:text-sm text-app-muted" id="dashStats" aria-live="polite">0 notes • 0 fichiers • 0 o utilisés</span>
+        </header>
+
+        <!-- 2.A TAB: DASHBOARD -->
+          <section class="dash-tab-content dash-main dash-flex-1 dash-h-full dash-flex dash-flex-col dash-min-w-0 dash-bg-app-bg dash-theme-transition dash-relative" id="tabContentDashboard" aria-label="Tableau de bord">
+            <!-- Contenu défilant -->
+            <div class="dash-flex-1 dash-overflow-y-auto dash-p-8 dash-space-y-10 dash-pb-24">
+              <!-- Section Notes Récentes -->
+              <section>
+                <h2 class="dash-text-lg dash-font-semibold dash-text-app-text dash-mb-4">Notes Récentes</h2>
+                <div class="dash-grid dash-grid-cols-1 dash-md-grid-cols-2 dash-lg-grid-cols-3 dash-gap-6" id="dashNotesList"></div>
+              </section>
+
+              <!-- Section Fichiers Récents -->
+              <section>
+                <h2 class="dash-text-lg dash-font-semibold dash-text-app-text dash-mb-4">Fichiers Récents</h2>
+                <div class="dash-grid dash-grid-cols-2 dash-md-grid-cols-3 dash-lg-grid-cols-4 dash-gap-6" id="dashFilesList"></div>
+              </section>
+            </div>
+
+              <!-- Floating Action Button (Mobile only simulé ici) -->
+            <button class="dash-lg-hidden dash-absolute dash-bottom-6 dash-right-6 dash-w-14 dash-h-14 dash-bg-app-primary dash-hover-bg-app-primary-hover dash-text-white dash-rounded-full dash-flex dash-items-center dash-justify-center dash-shadow-lg dash-transition-transform dash-hover-translate-y-1" onclick="switchMainTab('notes'); creerNouvelleNote()" title="Nouvelle note" aria-label="Nouvelle note">
+              <svg class="dash-w-6 dash-h-6 dash-stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+
+            <template id="dashNoteCardTemplate">
+              <article class="dash-bg-app-card dash-border dash-border-app-border dash-hover-border-app-muted dash-rounded-xl dash-p-5 dash-cursor-pointer dash-transition-all dash-hover-shadow-md dash-relative dash-theme-transition" tabindex="0" role="button">
+                <div class="dash-absolute dash-top-4 dash-right-4 dash-text-app-primary" data-dash-slot="pin" hidden>
+                  <svg class="dash-w-5 dash-h-5 dash-stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </div>
+                <h3 class="dash-font-bold dash-text-app-text dash-mb-2 dash-pr-6 dash-truncate" data-dash-slot="title"></h3>
+                <p class="dash-text-sm dash-text-app-muted dash-line-clamp-3 dash-mb-4" data-dash-slot="preview"></p>
+                <div class="dash-text-xs dash-text-app-muted dash-font-medium" data-dash-slot="date"></div>
+              </article>
+            </template>
+            <template id="dashFileCardTemplate">
+              <article class="dash-bg-app-card dash-border dash-border-app-border dash-hover-border-app-muted dash-rounded-xl dash-p-4 dash-flex dash-flex-col dash-items-center dash-text-center dash-cursor-pointer dash-transition-all dash-hover-shadow-md dash-theme-transition" tabindex="0" role="button">
+                <div class="dash-w-full dash-h-20 dash-bg-app-border dash-rounded-lg dash-mb-3 dash-overflow-hidden" data-dash-slot="image-preview" hidden>
+                  <img class="dash-w-full dash-h-full dash-object-cover dash-opacity-80" alt="Aperçu du fichier">
+                </div>
+                <div class="dash-w-16 dash-h-16 dash-bg-rose-500-10 dash-rounded-xl dash-flex dash-items-center dash-justify-center dash-mb-3" data-dash-slot="file-type">
+                  <span class="dash-text-rose-500 dash-font-bold dash-text-xl" data-dash-slot="extension"></span>
+                </div>
+                <h3 class="dash-text-sm dash-font-medium dash-text-app-text dash-w-full dash-truncate" data-dash-slot="name"></h3>
+                <span class="dash-text-xs dash-text-app-muted dash-mt-1" data-dash-slot="size"></span>
+                <span class="dash-text-xs dash-text-app-muted dash-mt-1" data-dash-slot="date"></span>
+              </article>
+            </template>
+            <template id="dashEmptyStateTemplate">
+              <div class="empty-state dash-empty-state"></div>
+            </template>
+            <template id="dashSkeletonTemplate">
+              <div class="skeleton-card dash-skeleton-card" aria-hidden="true">
+                <div class="skeleton-line title"></div>
+                <div class="skeleton-line subtitle"></div>
+                <div class="skeleton-line date"></div>
+              </div>
+            </template>
+            </section>
+
+                <!-- 2.B TAB: FILES -->
+        <div id="tabContentFiles" class="tab-content flex-1 flex-col overflow-y-auto p-4 md:p-8 space-y-6 pb-24">
+            <!-- Zone Upload -->
+            <div class="bg-app-card border border-dashed border-app-border hover:border-app-primary hover:bg-app-primary/5 rounded-xl p-8 text-center cursor-pointer transition-colors" onclick="document.getElementById('fileUploadInput').click()" id="dropZone">
+                <input type="file" id="fileUploadInput" class="hidden" multiple onchange="onFileSelected(this.files)">
+                <svg class="w-12 h-12 stroke-current text-app-primary mx-auto mb-3" viewBox="0 0 24 24"><path d="M20 16.2A5 5 0 0 0 18 6.4 7 7 0 0 0 4.3 9 4.5 4.5 0 0 0 5 18h3"></path><path d="m12 12-4 4m4-4 4 4m-4-4v9"></path></svg>
+                <h3 class="text-lg font-semibold text-app-text mb-1">Glissez vos fichiers ici</h3>
+                <p class="text-sm text-app-muted mb-4">Images, PDF, Archives, Audio & Vidéo</p>
+                <button class="bg-app-primary hover:bg-app-primary-hover text-white px-5 py-2 rounded-lg font-medium transition-colors" onclick="event.stopPropagation(); document.getElementById('fileUploadInput').click()">Parcourir</button>
+                <div id="uploadProgress" class="mt-3 text-sm font-semibold text-app-primary hidden"></div>
+            </div>
+
+            <!-- Liste Fichiers -->
+            <div class="bg-app-card border border-app-border rounded-xl shadow-sm overflow-hidden flex flex-col">
+                <div class="p-4 border-b border-app-border flex items-center justify-between bg-app-sidebar">
+                    <h2 class="font-bold text-app-text">Bibliothèque <span id="filesCountBadge">0 fichier</span></h2>
+                    <div class="flex items-center gap-2">
+                        <div class="flex bg-app-bg p-1 rounded-lg border border-app-border">
+                            <button id="btnViewGrid" onclick="setFilesViewMode('grid')" class="p-1.5 rounded text-app-muted hover:text-app-text active:bg-app-card"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></button>
+                            <button id="btnViewList" onclick="setFilesViewMode('list')" class="p-1.5 rounded text-app-muted hover:text-app-text"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><circle cx="3.5" cy="6" r="1.5"></circle><circle cx="3.5" cy="12" r="1.5"></circle><circle cx="3.5" cy="18" r="1.5"></circle></svg></button>
+                        </div>
+                        <button id="refreshFilesBtn" onclick="chargerFichiers()" class="p-2 bg-app-bg border border-app-border text-app-muted hover:text-app-text rounded-lg"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                    </div>
+                </div>
+                <div class="favorites-setup-notice" id="sharedFavoritesNotice" role="status" hidden>Les favoris partagés ne sont pas configurés. Exécutez le script <code>supabase_shared_file_favorites.sql</code> dans Supabase pour activer cette fonction.</div>
+                <div class="p-4 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" id="filesListContainer">
+                    <!-- Fichiers rendus ici -->
+                </div>
+            </div>
         </div>
-      </header>
 
-      <div class="app-content">
-        <div class="tab-content active" id="tabContentNotes">
-          <div class="notepad-container">
-            <aside class="notes-sidebar">
-              <div class="notes-sidebar-header">
-                <div class="notes-sidebar-top">
-                  <span class="notes-count-badge" id="notesListTitleBadge">Notes</span>
-                  <button class="btn btn-primary" onclick="creerNouvelleNote()" style="padding:4px 9px;font-size:12px;"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-add"></use></svg> Nouvelle</button>
+        <!-- 2.C TAB: NOTES (Liste + Editor Panel inclus ici pour Desktop) -->
+        <div id="tabContentNotes" class="tab-content flex-1 h-full flex overflow-hidden">
+            <!-- Colonne Liste de Notes -->
+            <div class="w-full lg:w-80 border-r border-app-border bg-app-surface flex flex-col h-full shrink-0 relative z-10" id="notesListColumn">
+                <div class="p-4 border-b border-app-border bg-app-sidebar flex items-center justify-between">
+                    <span class="font-bold text-sm text-app-text" id="notesListTitleBadge">Notes</span>
+                    <button onclick="creerNouvelleNote()" class="text-xs bg-app-primary text-white px-2.5 py-1.5 rounded-md hover:bg-app-primary-hover flex items-center gap-1"><svg class="w-3 h-3 stroke-current" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Nouvelle</button>
                 </div>
-                <div class="notes-search-wrapper">
-                  <span class="notes-search-icon"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-search"></use></svg></span>
-                  <input type="text" class="notes-search-input" id="noteSearchInput" placeholder="Filtrer les notes..." oninput="onNoteSearch(this.value)">
+                <div class="p-3 border-b border-app-border bg-app-sidebar">
+                    <div class="relative">
+                        <svg class="w-4 h-4 absolute left-3 top-2.5 text-app-muted stroke-current" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                        <input type="text" id="noteSearchInput" class="w-full bg-app-bg border border-app-border text-sm text-app-text rounded-lg pl-9 pr-3 py-2 outline-none focus:border-app-primary" placeholder="Filtrer les notes..." oninput="onNoteSearch(this.value)">
+                    </div>
                 </div>
-              </div>
-              <div class="notes-list" id="notesListContainer"></div>
-            </aside>
+                <div class="flex-1 overflow-y-auto p-3 space-y-2" id="notesListContainer">
+                    <!-- Notes rendues ici -->
+                </div>
+            </div>
 
-            <section class="note-editor-wrapper" id="noteEditorWrapper">
-              <div class="editor-top-bar">
-                <button type="button" class="mobile-back-btn" onclick="fermerEditeurMobile()"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-back"></use></svg> Retour</button>
-                <input type="text" class="note-title-input" id="noteTitleInput" placeholder="Titre de la note..." maxlength="80" title="Maximum 80 caractères" oninput="onNoteTitleChange()">
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <button class="btn-card-action" id="pinActiveNoteBtn" onclick="togglePinActiveNote()" title="Épingler" aria-label="Épingler" style="font-size:15px;padding:3px 6px;"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-pin"></use></svg></button>
-                  <button type="button" class="btn-card-action" id="noteFullscreenBtn" onclick="toggleNoteFullscreen()" title="Plein écran" aria-label="Passer la note en plein écran" aria-pressed="false"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-maximize"></use></svg></button>
-                  <div class="save-status-container">
-                    <span class="save-status-icon" id="saveStatusIcon"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-check"></use></svg></span>
-                    <span id="saveStatusText">Enregistré</span>
-                  </div>
+            <!-- Colonne Editor Panel (Visible Desktop, Absolute Mobile) -->
+            <aside id="noteEditorWrapper" class="right-editor-panel note-editor-wrapper flex-1 bg-app-surface flex flex-col h-full shadow-2xl relative z-20 theme-transition">
+                <!-- En-tête -->
+                <div class="h-[68px] px-4 flex items-center justify-between border-b border-app-border shrink-0 bg-app-card">
+                    <div class="flex items-center gap-3 w-full lg:w-auto overflow-hidden">
+                        <button class="lg:hidden p-2 text-app-muted hover:bg-app-hover rounded-lg" onclick="fermerEditeurMobile()"><svg class="w-5 h-5 stroke-current" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg></button>
+                        <input type="text" id="noteTitleInput" maxlength="80" class="text-xl md:text-2xl font-bold text-app-text bg-transparent border-none outline-none w-full truncate placeholder-app-muted" placeholder="Titre de la note..." oninput="onNoteTitleChange()">
+                    </div>
+                    <div class="hidden lg:flex items-center gap-2 shrink-0">
+                        <div class="save-status-container flex items-center gap-1.5 text-xs font-medium text-app-muted mr-3">
+                            <span class="save-status-icon" id="saveStatusIcon"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg></span>
+                            <span id="saveStatusText">Enregistré</span>
+                        </div>
+                        <button class="p-2 text-app-muted hover:text-app-primary hover:bg-app-hover rounded-lg transition-colors" id="pinActiveNoteBtn" onclick="togglePinActiveNote()"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
+<button id="noteFullscreenBtn" class="p-2 text-app-muted hover:text-app-primary rounded-lg" onclick="toggleNoteFullscreen()" title="Plein écran" aria-label="Passer la note en plein écran" aria-pressed="false"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3"></path></svg></button>
+                        <button class="p-2 text-app-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors" onclick="supprimerNoteActive()"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                    </div>
                 </div>
-              </div>
 
-              <div class="editor-toolbar">
-                <div class="toolbar-group">
-                  <button class="toolbar-btn" onclick="insererMarkdown('**', '**')" title="Gras" aria-label="Gras"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-bold"></use></svg></button>
-                  <button class="toolbar-btn" onclick="insererMarkdown('*', '*')" title="Italique" aria-label="Italique"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-italic"></use></svg></button>
-                  <button class="toolbar-btn" onclick="insererMarkdown('~~', '~~')" title="Barré" aria-label="Barré"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-strike"></use></svg></button>
-                  <button class="toolbar-btn" onclick="insererMarkdown('`', '`')" title="Code" aria-label="Code"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-code"></use></svg></button>
-                  <div class="toolbar-divider"></div>
-                  <button class="toolbar-btn" onclick="insererMarkdown('# ', '')" title="Titre 1" aria-label="Titre 1"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-h1"></use></svg></button>
-                  <button class="toolbar-btn" onclick="insererMarkdown('## ', '')" title="Titre 2" aria-label="Titre 2"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-h2"></use></svg></button>
-                  <button class="toolbar-btn" onclick="insererMarkdown('- ', '')" title="Liste" aria-label="Liste"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-list"></use></svg></button>
-                  <button class="toolbar-btn" onclick="insererMarkdown('> ', '')" title="Citation" aria-label="Citation"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-quote"></use></svg></button>
-                  <button class="toolbar-btn" onclick="insererMarkdown('[', '](https://)')" title="Lien" aria-label="Lien"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-link"></use></svg></button>
+                <!-- Toolbar -->
+                <div class="px-4 py-2 border-b border-app-border flex items-center flex-wrap gap-2 bg-app-bg shrink-0">
+                    <div class="flex items-center gap-1 bg-app-card border border-app-border rounded-lg p-1">
+                        <button class="p-1.5 text-app-muted hover:text-app-text hover:bg-app-hover rounded-md transition-colors" onclick="insererMarkdown('**', '**')"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 0 1 0 8H6zM6 12h9a4 4 0 0 1 0 8H6z"></path></svg></button>
+                        <button class="p-1.5 text-app-muted hover:text-app-text hover:bg-app-hover rounded-md transition-colors" onclick="insererMarkdown('*', '*')"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><path d="M19 4h-9M14 20H5m10-16-6 16"></path></svg></button>
+                        <button class="p-1.5 text-app-muted hover:text-app-text hover:bg-app-hover rounded-md transition-colors" onclick="insererMarkdown('~~', '~~')"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><path d="M16 4h-4a4 4 0 0 0 0 8h4a4 4 0 0 1 0 8h-4M4 12h16"></path></svg></button>
+                    </div>
+                    <div class="flex items-center gap-1 bg-app-card border border-app-border rounded-lg p-1">
+                        <button class="p-1.5 text-app-muted hover:text-app-text hover:bg-app-hover rounded-md transition-colors" onclick="insererMarkdown('# ', '')"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><path d="M4 12h8M4 18V6M12 18V6M17 12l2-2v8"></path></svg></button>
+                        <button class="p-1.5 text-app-muted hover:text-app-text hover:bg-app-hover rounded-md transition-colors" onclick="insererMarkdown('## ', '')"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><path d="M4 12h8M4 18V6M12 18V6M17 11a2 2 0 1 1 4 0c0 2-4 5-4 7h4"></path></svg></button>
+                        <button class="p-1.5 text-app-muted hover:text-app-text hover:bg-app-hover rounded-md transition-colors" onclick="insererMarkdown('- ', '')"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"></path><circle cx="3.5" cy="6" r="1.5" fill="currentColor"></circle><circle cx="3.5" cy="12" r="1.5" fill="currentColor"></circle><circle cx="3.5" cy="18" r="1.5" fill="currentColor"></circle></svg></button>
+                        <button class="p-1.5 text-app-muted hover:text-app-text hover:bg-app-hover rounded-md transition-colors" onclick="insererMarkdown('[', '](https://)')"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></button>
+                    </div>
+                    <div class="flex-1"></div>
+                    <div class="flex items-center gap-1"><button class="px-2 py-1.5 text-xs text-app-muted" onclick="exporterNote('md')">.md</button><button class="px-2 py-1.5 text-xs text-app-muted" onclick="exporterNote('txt')">.txt</button></div>
+                    <div class="flex items-center gap-1 bg-app-card border border-app-border rounded-lg p-1 text-xs font-semibold">
+                        <button class="px-2 py-1.5 rounded-md text-app-primary bg-app-primary/10" id="btnModeEdit" onclick="changerModeVue('edit')">Éditer</button>
+                        <button class="px-2 py-1.5 rounded-md text-app-muted hover:text-app-text hover:bg-app-hover" id="btnModeSplit" onclick="changerModeVue('split')">Partagé</button>
+                        <button class="px-2 py-1.5 rounded-md text-app-muted hover:text-app-text hover:bg-app-hover" id="btnModePreview" onclick="changerModeVue('preview')">Aperçu</button>
+                    </div>
                 </div>
-                <div class="toolbar-group">
-                  <div class="toolbar-divider"></div>
-                  <button class="toolbar-btn active" id="btnModeEdit" onclick="changerModeVue('edit')">Éditer</button>
-                  <button class="toolbar-btn" id="btnModeSplit" onclick="changerModeVue('split')">Partagé</button>
-                  <button class="toolbar-btn" id="btnModePreview" onclick="changerModeVue('preview')"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-eye"></use></svg> Aperçu</button>
-                  <div class="toolbar-divider"></div>
-                  <button class="toolbar-btn" onclick="exporterNote('md')" title="Exporter en Markdown" aria-label="Exporter en Markdown"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-download"></use></svg> .md</button>
-                  <button class="toolbar-btn" onclick="exporterNote('txt')" title="Exporter en texte" aria-label="Exporter en texte"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-download"></use></svg> .txt</button>
-                  <button class="toolbar-btn btn-danger-outline" onclick="supprimerNoteActive()" title="Supprimer la note" aria-label="Supprimer la note"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-trash"></use></svg></button>
-                </div>
-              </div>
 
-              <div class="editor-body-container" id="editorBodyContainer">
-                <div class="floating-bubble-menu" id="floatingBubbleMenu">
+                <!-- Zone Texte -->
+                <div class="flex-1 flex flex-row overflow-hidden relative" id="editorBodyContainer">
+                    <div class="floating-bubble-menu" id="floatingBubbleMenu">
                   <button class="bubble-btn" onmousedown="event.preventDefault(); insererMarkdown('**', '**')" title="Gras" aria-label="Gras"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-bold"></use></svg></button>
                   <button class="bubble-btn" onmousedown="event.preventDefault(); insererMarkdown('*', '*')" title="Italique" aria-label="Italique"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-italic"></use></svg></button>
                   <button class="bubble-btn" onmousedown="event.preventDefault(); insererMarkdown('~~', '~~')" title="Barré" aria-label="Barré"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-strike"></use></svg></button>
@@ -233,95 +468,51 @@
                   <button class="bubble-btn" onmousedown="event.preventDefault(); insererMarkdown('### ', '')" title="Titre 3" aria-label="Titre 3"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-h3"></use></svg></button>
                   <button class="bubble-btn" onmousedown="event.preventDefault(); insererMarkdown('[', '](https://)')" title="Lien" aria-label="Lien"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-link"></use></svg></button>
                 </div>
-                <textarea class="note-textarea" id="noteContentTextarea" placeholder="Commencez à écrire votre note... Glissez des fichiers ou images directement ici !" oninput="onNoteContentChange()"></textarea>
-                <div class="markdown-preview" id="markdownPreview"></div>
-              </div>
+<textarea id="noteContentTextarea" class="flex-1 h-full resize-none p-6 bg-transparent text-app-text text-base leading-relaxed outline-none border-none font-mono" placeholder="Écrivez votre note ici (Support Markdown)..." oninput="onNoteContentChange()"></textarea>
+                    <div id="markdownPreview" class="markdown-preview flex-1 h-full p-6 text-app-text leading-relaxed"></div>
+                </div>
 
-              <div class="editor-footer-bar">
-                <span class="word-count" id="editorWordCount">0 mots • 0 caractères</span>
-                <span style="font-size:11px;color:var(--text-muted);">Ctrl + S sauvegarde • Ctrl + K recherche</span>
-              </div>
-            </section>
-          </div>
+                <!-- Footer Stats -->
+                <div class="p-2 border-t border-app-border bg-app-sidebar shrink-0 flex items-center justify-between text-xs text-app-muted">
+                    <span id="editorWordCount">0 mots • 0 caractères</span>
+                    <span class="hidden md:inline">Auto-save ON</span>
+                </div>
+            </aside>
         </div>
 
-        <!-- ONGLET FICHIERS -->
-        <div class="tab-content" id="tabContentFiles">
-          <div class="files-layout">
-            <div class="upload-box" id="dropZone" onclick="document.getElementById('fileUploadInput').click()">
-              <input type="file" id="fileUploadInput" class="hidden-file-input" multiple onchange="onFileSelected(this.files)">
-              <div class="upload-icon"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-cloud-upload"></use></svg></div>
-              <div class="upload-title">Glissez vos fichiers ici ou cliquez pour parcourir</div>
-              <div class="upload-subtitle">Images, PDF, Word, Tableurs, Archives, Audio & Vidéo</div>
-              <button class="btn btn-primary" onclick="event.stopPropagation(); document.getElementById('fileUploadInput').click()">
-                Choisir des fichiers
-              </button>
-              <div class="upload-progress" id="uploadProgress"></div>
-            </div>
+        <!-- FAB Mobile -->
+        <button class="lg:hidden fixed bottom-20 right-4 w-14 h-14 bg-app-primary text-white rounded-full flex items-center justify-center shadow-lg hover:-translate-y-1 transition-transform z-40" id="fabAdd" onclick="onFabClick()"><svg class="w-6 h-6 stroke-current" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
 
-            <div class="files-section-card">
-              <div class="files-header">
-                <div class="files-header-left">
-                  <h2 class="files-title">Bibliothèque de fichiers</h2>
-                  <span class="nav-badge" id="filesCountBadge">0</span>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <div class="files-view-toggles">
-                    <button class="view-toggle-btn active" id="btnViewGrid" onclick="setFilesViewMode('grid')" title="Vue Grille"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-grid"></use></svg> Grille</button>
-                    <button class="view-toggle-btn" id="btnViewList" onclick="setFilesViewMode('list')" title="Vue Liste"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-list"></use></svg> Liste</button>
-                  </div>
-                  <button class="btn btn-outline" id="refreshFilesBtn" onclick="chargerFichiers()" title="Actualiser" aria-label="Actualiser les fichiers" style="padding:4px 8px;font-size:12px;"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-refresh"></use></svg></button>
-                </div>
-              </div>
-              <div class="favorites-setup-notice" id="sharedFavoritesNotice" role="status" hidden>
-                Les favoris partagés ne sont pas configurés. Exécute le script
-                <code>supabase_shared_file_favorites.sql</code> dans Supabase pour activer cette fonction.
-              </div>
-              <div class="files-grid" id="filesListContainer"></div>
-            </div>
-          </div>
-        </div>
-      </div>
     </main>
-  </div>
 
-  <nav class="mobile-bottom-nav">
-    <button class="bnav-item active" id="bnavNotes" onclick="switchMainTab('notes')">
-      <span class="bnav-icon"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-notes"></use></svg></span><span>Notes</span>
-    </button>
-    <button class="bnav-item" id="bnavFiles" onclick="switchMainTab('files')">
-      <span class="bnav-icon"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-folder"></use></svg></span><span>Fichiers</span>
-    </button>
-    <button class="bnav-item" onclick="ouvrirCommandPalette()">
-      <span class="bnav-icon"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-search"></use></svg></span><span>Chercher</span>
-    </button>
-    <button class="bnav-item" onclick="cycleThemeMobile()">
-      <span class="bnav-icon"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-theme"></use></svg></span><span>Thème</span>
-    </button>
-  </nav>
+    <!-- Mobile Bottom Nav -->
+    <nav class="md:hidden fixed bottom-0 left-0 w-full h-[60px] bg-app-card border-t border-app-border flex items-center justify-around z-50">
+        <button class="flex flex-col items-center gap-1 text-app-primary" id="bnavNotes" onclick="switchMainTab('notes')"><svg class="w-5 h-5 stroke-current" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg><span class="text-[10px] font-bold">Notes</span></button>
+        <button class="flex flex-col items-center gap-1 text-app-muted hover:text-app-text" id="bnavFiles" onclick="switchMainTab('files')"><svg class="w-5 h-5 stroke-current" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg><span class="text-[10px] font-semibold">Fichiers</span></button>
+        <button class="flex flex-col items-center gap-1 text-app-muted hover:text-app-text" id="bnavDashboard" onclick="switchMainTab('dashboard')"><svg class="w-5 h-5 stroke-current" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg><span class="text-[10px] font-semibold">Dashboard</span></button>
+        <button class="flex flex-col items-center gap-1 text-app-muted hover:text-app-text" onclick="ouvrirCommandPalette()"><svg class="w-5 h-5 stroke-current" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg><span class="text-[10px] font-semibold">Chercher</span></button>
+    </nav>
 
-  <button class="fab" id="fabAdd" onclick="onFabClick()" title="Action rapide" aria-label="Action rapide"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-add"></use></svg></button>
-
-  <div class="modal-overlay" id="fileViewerModal" onclick="fermerVisualiseur()">
-    <div class="modal-dialog" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div class="modal-title-box">
-          <div class="modal-title" id="viewerFileName">Aperçu</div>
-          <div class="modal-meta" id="viewerFileMeta">Taille</div>
+    <!-- Modal Fichier (Viewer) -->
+    <div class="modal-overlay fixed inset-0 z-[2000] hidden items-center justify-center p-4" id="fileViewerModal" onclick="fermerVisualiseur()">
+        <div class="w-full max-w-4xl bg-app-card border border-app-border rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh]" onclick="event.stopPropagation()">
+            <div class="p-4 border-b border-app-border bg-app-sidebar flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-app-text truncate max-w-sm" id="viewerFileName">Aperçu</h3>
+                    <p class="text-xs text-app-muted" id="viewerFileMeta">Taille</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="px-3 py-1.5 bg-app-bg border border-app-border rounded-lg text-sm hover:border-app-primary text-app-text flex items-center gap-2" id="viewerBtnDownload"><svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg> <span class="hidden sm:inline">Télécharger</span></button>
+<button id="viewerBtnCopyLink" class="px-3 py-1.5 bg-app-bg border border-app-border rounded-lg text-sm text-app-text" title="Copier le lien">Copier le lien</button>
+                    <button class="p-1.5 text-app-muted hover:text-app-text hover:bg-app-hover rounded-lg" onclick="fermerVisualiseur()"><svg class="w-6 h-6 stroke-current" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                </div>
+            </div>
+            <div class="p-4 overflow-y-auto flex-1 bg-app-bg" id="viewerContent"></div>
         </div>
-        <div class="modal-actions">
-          <button class="btn btn-outline" id="viewerBtnDownload"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-download"></use></svg> Télécharger</button>
-          <button class="btn btn-outline" id="viewerBtnCopyLink"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-link"></use></svg> Copier lien</button>
-          <button class="btn-modal-close" onclick="fermerVisualiseur()" aria-label="Fermer"><svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-close"></use></svg></button>
-        </div>
-      </div>
-      <div class="modal-body" id="viewerContent"></div>
     </div>
-  </div>
 
-  <div id="toastContainer" aria-live="polite"></div>
-
-  <script>
+    <!-- LOGIQUE APPLICATIVE COMPLETE -->
+    <script>
     /* =========================================================================
        CONFIGURATION & ETAT DE L'APPLICATION (SAAS PRO)
        ========================================================================= */
@@ -337,7 +528,7 @@
 
     if (typeof marked !== 'undefined') {
   const renderer = new marked.Renderer();
-  
+
   // Surcharge du rendu des liens Markdown
   renderer.link = ({ href, title, text }) => {
     const titleAttr = title ? `title="${title}"` : '';
@@ -348,6 +539,8 @@
     }
 
     let notes = [];
+    let isLoadingNotes = false;
+    let notesLoadError = false;
     let activeNote = null;
     let autoSaveTimer = null;
     let currentViewMode = 'edit';
@@ -366,14 +559,13 @@
        ========================================================================= */
     function setTheme(themeName) {
       const theme = themeName === 'light' || themeName === 'mono' ? 'light' : 'dark';
-      document.documentElement.className = '';
-      document.documentElement.classList.add(`theme-${theme}`);
-      document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
-      const activeBtn = document.getElementById(`theme-btn-${theme}`);
-      if (activeBtn) activeBtn.classList.add('active');
+      const root = document.documentElement;
+      root.className = ''; root.classList.add(`theme-${theme}`);
+      if (theme === 'light') root.setAttribute('data-theme','notion'); else root.removeAttribute('data-theme');
+      const label = document.getElementById('themeText');
+      if (label) label.textContent = theme === 'light' ? 'Th\u00e8me: Notion (Clair)' : 'Th\u00e8me: Midnight (Sombre)';
       localStorage.setItem('app-theme', theme);
     }
-
     function cycleThemeMobile() {
       const themes = ['dark', 'light'];
       const current = localStorage.getItem('app-theme') || 'dark';
@@ -389,45 +581,190 @@
        ========================================================================= */
     function switchMainTab(tabName) {
       if (tabName !== 'notes') quitterPleinEcranNote();
-      activeMainTab = tabName;
-      document.getElementById('navItemNotes').classList.toggle('active', tabName === 'notes');
-      document.getElementById('navItemFiles').classList.toggle('active', tabName === 'files');
-      document.getElementById('bnavNotes').classList.toggle('active', tabName === 'notes');
-      document.getElementById('bnavFiles').classList.toggle('active', tabName === 'files');
-      document.getElementById('tabContentNotes').classList.toggle('active', tabName === 'notes');
-      document.getElementById('tabContentFiles').classList.toggle('active', tabName === 'files');
+      activeMainTab=tabName;
+      ['notes','files','dashboard'].forEach(tab=>{
+        const name=tab[0].toUpperCase()+tab.slice(1), nav=document.getElementById('navItem'+name), bottom=document.getElementById('bnav'+name), content=document.getElementById('tabContent'+name);
+        if(nav){const selected=tab===tabName; nav.classList.toggle('text-app-text',selected); nav.classList.toggle('bg-app-hover',selected); nav.classList.toggle('text-app-muted',!selected); nav.classList.toggle('active',selected); const icon=nav.querySelector('svg'); if(icon) icon.classList.toggle('text-app-primary',selected);}
+        if(bottom){bottom.classList.toggle('text-app-primary',tab===tabName); bottom.classList.toggle('active',tab===tabName);}
+        if(content){content.classList.toggle('active',tab===tabName&&tab!=='dashboard');content.classList.toggle('dash-active',tab===tabName&&tab==='dashboard');}
+      });
+      const fab=document.getElementById('fabAdd'); if(fab) fab.style.display=tabName==='dashboard'?'none':'';
+      const stats=document.getElementById('dashStats'); if(stats) stats.classList.toggle('hidden',tabName!=='dashboard');
+      if(tabName==='dashboard') afficherTableauDeBord();
+      const titles={notes:'Mes Notes',files:'Fichiers',dashboard:'Tableau de bord'}, icons={notes:'notes',files:'folder',dashboard:'grid'};
+      document.getElementById('breadcrumbTitle').innerHTML=`<svg class="w-6 h-6 stroke-current text-app-primary" viewBox="0 0 24 24"><use href="#ui-icon-${icons[tabName]}"></use></svg><span>${titles[tabName]}</span>`;
+      toggleMobileSidebar(false); fermerEditeurMobile();
+    }
+    const dashboardRelativeTime = new Intl.RelativeTimeFormat('fr-FR', { numeric: 'auto' });
 
-      const titleEl = document.getElementById('breadcrumbTitle');
-      if (tabName === 'notes') {
-        titleEl.innerHTML = '<svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-notes"></use></svg><span>Mes Notes</span>';
-      } else {
-        titleEl.innerHTML = '<svg class="ui-icon" aria-hidden="true"><use href="#ui-icon-folder"></use></svg><span>Bibliothèque de Fichiers</span>';
+    function obtenirDateModification(item) {
+      return item.updated_at || item.modified_at || item.lastModified || item.created_at || null;
+    }
+
+    function obtenirHorodatageModification(item) {
+      const timestamp = new Date(obtenirDateModification(item) || 0).getTime();
+      return Number.isFinite(timestamp) ? timestamp : 0;
+    }
+
+    function formaterDateRelative(dateValue) {
+      if (!dateValue) return 'Date inconnue';
+      const timestamp = new Date(dateValue).getTime();
+      if (!Number.isFinite(timestamp)) return 'Date inconnue';
+      const seconds = Math.round((timestamp - Date.now()) / 1000);
+      const intervals = [
+        ['second', 60],
+        ['minute', 60],
+        ['hour', 24],
+        ['day', 30],
+        ['month', 12],
+        ['year', Infinity]
+      ];
+      let value = seconds;
+      for (const [unit, limit] of intervals) {
+        if (Math.abs(value) < limit) return dashboardRelativeTime.format(value, unit);
+        value = Math.round(value / limit);
       }
-      toggleMobileSidebar(false);
+      return dashboardRelativeTime.format(value, 'year');
+    }
+
+    function ajouterSkeletonDashboard(container, count) {
+      const template = document.getElementById('dashSkeletonTemplate');
+      const fragment = document.createDocumentFragment();
+      for (let i = 0; i < count; i++) {
+        fragment.appendChild(template.content.cloneNode(true));
+      }
+      container.replaceChildren(fragment);
+    }
+
+    function afficherEtatVideDashboard(container, message) {
+      const fragment = document.getElementById('dashEmptyStateTemplate').content.cloneNode(true);
+      fragment.querySelector('.dash-empty-state').textContent = message;
+      container.replaceChildren(fragment);
+    }
+
+    function afficherTableauDeBord() {
+      const notesContainer = document.getElementById('dashNotesList');
+      const filesContainer = document.getElementById('dashFilesList');
+      if (!notesContainer || !filesContainer) return;
+
+      const totalStorageBytes = storedFiles.reduce((total, file) => {
+        const size = Number(file.metadata && file.metadata.size);
+        return total + (Number.isFinite(size) && size > 0 ? size : 0);
+      }, 0);
+      document.getElementById('dashStats').textContent =
+        `${notes.length} note${notes.length > 1 ? 's' : ''} • ${storedFiles.length} fichier${storedFiles.length > 1 ? 's' : ''} • ${formatBytes(totalStorageBytes)} utilisés`;
+
+      if (isLoadingNotes && notes.length === 0) {
+        ajouterSkeletonDashboard(notesContainer, 3);
+      } else if (notesLoadError && notes.length === 0) {
+        afficherEtatVideDashboard(notesContainer, 'Impossible de charger les notes.');
+      } else {
+        const recentNotes = [...notes]
+          .sort((a, b) => obtenirHorodatageModification(b) - obtenirHorodatageModification(a))
+          .slice(0, 5);
+        if (recentNotes.length === 0) {
+          afficherEtatVideDashboard(notesContainer, 'Aucune note');
+        } else {
+          const template = document.getElementById('dashNoteCardTemplate');
+          const fragment = document.createDocumentFragment();
+          recentNotes.forEach(note => {
+            const card = template.content.firstElementChild.cloneNode(true);
+            const title = note.titre && note.titre.trim() ? note.titre : 'Sans titre';
+            const preview = (note.contenu || '').replace(/[#*`_~>\[\]]/g, '').trim() || 'Aucun contenu...';
+            const isPinned = pinnedNoteIds.has(note.id);
+            card.querySelector('[data-dash-slot="title"]').textContent = title;
+            card.querySelector('[data-dash-slot="preview"]').textContent = preview;
+            card.querySelector('[data-dash-slot="date"]').textContent = `Modifié ${formaterDateRelative(obtenirDateModification(note))}`;
+            card.querySelector('[data-dash-slot="pin"]').hidden = !isPinned;
+            if (isPinned) {
+              card.classList.remove('dash-border', 'dash-border-app-border', 'dash-hover-border-app-muted', 'dash-transition-all', 'dash-hover-shadow-md');
+              card.classList.add('dash-border-2', 'dash-border-app-primary', 'dash-shadow-sm');
+            }
+            const openNote = () => {
+              switchMainTab('notes');
+              selectionnerNote(note.id);
+            };
+            card.addEventListener('click', openNote);
+            card.addEventListener('keydown', event => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openNote();
+              }
+            });
+            fragment.appendChild(card);
+          });
+          notesContainer.replaceChildren(fragment);
+        }
+      }
+
+      if (isLoadingFiles && storedFiles.length === 0) {
+        ajouterSkeletonDashboard(filesContainer, 3);
+      } else if (filesLoadError && storedFiles.length === 0) {
+        afficherEtatVideDashboard(filesContainer, 'Impossible de charger les fichiers.');
+      } else {
+        const recentFiles = [...storedFiles]
+          .sort((a, b) => obtenirHorodatageModification(b) - obtenirHorodatageModification(a))
+          .slice(0, 5);
+        if (recentFiles.length === 0) {
+          afficherEtatVideDashboard(filesContainer, 'Aucun fichier');
+        } else {
+          const template = document.getElementById('dashFileCardTemplate');
+          const fragment = document.createDocumentFragment();
+          recentFiles.forEach(file => {
+            const card = template.content.firstElementChild.cloneNode(true);
+            const fileName = decodeStorageKey(file.name);
+            const extension = fileName.includes('.') ? fileName.split('.').pop().toUpperCase().slice(0, 5) : 'FILE';
+            const fileIndex = storedFiles.indexOf(file);
+            const fileSize = Number(file.metadata && file.metadata.size);
+            card.querySelector('[data-dash-slot="extension"]').textContent = extension;
+            card.querySelector('[data-dash-slot="name"]').textContent = fileName;
+            card.querySelector('[data-dash-slot="size"]').textContent =
+              Number.isFinite(fileSize) && fileSize >= 0 ? formatBytes(fileSize) : 'Taille inconnue';
+            card.querySelector('[data-dash-slot="date"]').textContent =
+              `Modifié ${formaterDateRelative(obtenirDateModification(file))}`;
+            if (/\.(?:gif|jpe?g|png|webp|svg)$/i.test(fileName)) {
+              const preview = card.querySelector('[data-dash-slot="image-preview"]');
+              preview.hidden = false;
+              preview.querySelector('img').src = supabaseClient.storage.from('fichiers').getPublicUrl(file.name).data.publicUrl;
+              card.querySelector('[data-dash-slot="file-type"]').hidden = true;
+            }
+            const openFile = () => {
+              switchMainTab('files');
+              ouvrirFichierParIndex(fileIndex);
+            };
+            card.addEventListener('click', openFile);
+            card.addEventListener('keydown', event => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openFile();
+              }
+            });
+            fragment.appendChild(card);
+          });
+          filesContainer.replaceChildren(fragment);
+        }
+      }
     }
 
     function toggleMobileSidebar(force) {
-      const sidebar = document.getElementById('appSidebar');
-      const backdrop = document.getElementById('sidebarBackdrop');
-      const isOpen = force !== undefined ? force : !sidebar.classList.contains('open');
-      sidebar.classList.toggle('open', isOpen);
-      backdrop.classList.toggle('active', isOpen);
+      const sidebar=document.getElementById('appSidebar'), backdrop=document.getElementById('sidebarBackdrop');
+      const open=force!==undefined?force:sidebar.classList.contains('-translate-x-full');
+      sidebar.classList.toggle('-translate-x-full',!open); if(backdrop) backdrop.classList.toggle('hidden',!open);
     }
-
     /* =========================================================================
        COMMAND PALETTE (CTRL+K / CMD+K)
        ========================================================================= */
     function ouvrirCommandPalette() {
       const overlay = document.getElementById('commandPaletteOverlay');
       const input = document.getElementById('commandSearchInput');
-      overlay.classList.add('active');
+      overlay.classList.remove('hidden'); overlay.classList.add('flex');
       input.value = '';
       onCommandSearch('');
       setTimeout(() => input.focus(), 50);
     }
 
     function fermerCommandPalette() {
-      document.getElementById('commandPaletteOverlay').classList.remove('active');
+      const overlay=document.getElementById('commandPaletteOverlay'); overlay.classList.add('hidden'); overlay.classList.remove('flex');
     }
 
     function handlePaletteBackdropClick(e) {
@@ -564,6 +901,9 @@
 
     async function chargerNotes() {
       if (!supabaseClient) return;
+      isLoadingNotes = true;
+      notesLoadError = false;
+      afficherTableauDeBord();
       afficherSkeletonNotes();
       try {
         const { data, error } = await supabaseClient
@@ -587,8 +927,12 @@
           creerNouvelleNote('Bienvenue dans votre Espace Pro', '# Bienvenue\n\nCeci est votre nouveau bloc-notes Pro.\n\n- Ouvrez la palette globale avec **Ctrl+K**.\n- Glissez des images ou fichiers directement ici.\n- Vos modifications sont sauvegardées en temps réel sur Supabase.');
         }
       } catch (err) {
+        notesLoadError = true;
         console.error('Erreur chargement notes:', err);
         showToast('Erreur chargement des notes', 'error');
+      } finally {
+        isLoadingNotes = false;
+        afficherTableauDeBord();
       }
     }
 
@@ -669,6 +1013,7 @@
       localStorage.setItem('app-pinned-notes', JSON.stringify([...pinnedNoteIds]));
       afficherListeNotes(document.getElementById('noteSearchInput').value);
       mettreAJourFavorisSidebar();
+      afficherTableauDeBord();
       if (activeNote && activeNote.id === noteId) {
         mettreAJourBoutonPinActif();
       }
@@ -773,6 +1118,7 @@
         if (error) throw error;
         if (data && data[0]) {
           notes.unshift(data[0]);
+          afficherTableauDeBord();
           document.getElementById('sidebarNotesCount').textContent = notes.length;
           document.getElementById('notesListTitleBadge').textContent = `${notes.length} note${notes.length > 1 ? 's' : ''}`;
           selectionnerNote(data[0].id);
@@ -792,14 +1138,18 @@
       const titleInput = document.getElementById('noteTitleInput');
       activeNote.titre = titleInput.value.slice(0, 80);
       if (titleInput.value !== activeNote.titre) titleInput.value = activeNote.titre;
+      activeNote.updated_at = new Date().toISOString();
+      afficherTableauDeBord();
       planifierSauvegarde();
     }
 
     function onNoteContentChange() {
       if (!activeNote) return;
       activeNote.contenu = document.getElementById('noteContentTextarea').value;
+      activeNote.updated_at = new Date().toISOString();
       mettreAJourStatsTexte();
       if (currentViewMode !== 'edit') actualiserApercuMarkdown();
+      afficherTableauDeBord();
       planifierSauvegarde();
     }
 
@@ -840,6 +1190,7 @@
 
         afficherListeNotes(document.getElementById('noteSearchInput').value);
         mettreAJourFavorisSidebar();
+        afficherTableauDeBord();
       } catch (err) {
         console.error('Erreur sauvegarde:', err);
         document.getElementById('saveStatusText').textContent = 'Erreur';
@@ -869,6 +1220,7 @@
       }
       afficherListeNotes(document.getElementById('noteSearchInput').value);
       mettreAJourFavorisSidebar();
+      afficherTableauDeBord();
 
       const deleteTimer = setTimeout(async () => {
         pendingDeletions.delete(noteId);
@@ -893,6 +1245,7 @@
           selectionnerNote(noteToDelete.id);
           afficherListeNotes(document.getElementById('noteSearchInput').value);
           mettreAJourFavorisSidebar();
+          afficherTableauDeBord();
           showToast('Suppression annulée', 'success');
         }
       });
@@ -1162,6 +1515,7 @@
     }
 
     let isLoadingFiles = false;
+    let filesLoadError = false;
     let sharedFavoritesLoaded = false;
     const sharedFavoriteFileKeys = new Set();
 
@@ -1246,6 +1600,8 @@
         return;
       }
       isLoadingFiles = true;
+      filesLoadError = false;
+      afficherTableauDeBord();
       const refreshButton = document.getElementById('refreshFilesBtn');
       if (refreshButton) {
         refreshButton.disabled = true;
@@ -1261,12 +1617,14 @@
         });
         if (error) throw error;
         storedFiles = (data || []).filter(f => f.name !== '.emptyFolderPlaceholder');
+        filesLoadError = false;
         await chargerFavorisFichiers();
         mettreAJourFavorisFichiersSidebar();
         document.getElementById('sidebarFilesCount').textContent = storedFiles.length;
         document.getElementById('filesCountBadge').textContent = `${storedFiles.length} fichier${storedFiles.length > 1 ? 's' : ''}`;
         afficherFichiers();
       } catch (err) {
+        filesLoadError = true;
         console.error('Erreur chargement fichiers:', err);
         showToast('Erreur chargement des fichiers', 'error');
         if (storedFiles.length === 0) {
@@ -1274,6 +1632,7 @@
         }
       } finally {
         isLoadingFiles = false;
+        afficherTableauDeBord();
         if (refreshButton) {
           refreshButton.disabled = false;
           refreshButton.removeAttribute('aria-busy');
@@ -1330,10 +1689,6 @@
         const dateStr = f.created_at ? new Date(f.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '';
         const isSelected = selectedFileIdx === realIdx;
 
-        const { data: { publicUrl } } = supabaseClient.storage.from('fichiers').getPublicUrl(f.name);
-        const ext = originalName.split('.').pop().toLowerCase();
-        const isImg = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
-        const mdLink = isImg ? `![${originalName}](${publicUrl})` : `[${originalName}](${publicUrl})`;
         const isFavorite = sharedFavoriteFileKeys.has(f.name);
 
         return `
@@ -1343,7 +1698,7 @@
                onclick="selectionnerFichier(${realIdx}, event)"
                ondblclick="ouvrirFichierParIndex(${realIdx})"
                draggable="true"
-               ondragstart="event.dataTransfer.setData('text/plain', '${mdLink}')">
+               data-file-index="${realIdx}">
             <div class="file-left">
               <span class="file-type-icon">${getFileIcon(originalName)}</span>
               <div class="file-details">
@@ -1365,6 +1720,12 @@
           </div>
         `;
       }).join('');
+      container.querySelectorAll('.file-card[draggable="true"]').forEach(card=>card.addEventListener('dragstart',event=>{
+        const file=storedFiles[Number(card.dataset.fileIndex)]; if(!file||!event.dataTransfer)return;
+        const name=decodeStorageKey(file.name), {data:{publicUrl}}=supabaseClient.storage.from('fichiers').getPublicUrl(file.name);
+        const ext=name.includes('.')?name.split('.').pop().toLowerCase():'';
+        event.dataTransfer.setData('text/plain',['jpg','jpeg','png','gif','webp','svg'].includes(ext)?`![${name}](${publicUrl})`:`[${name}](${publicUrl})`);
+      }));
     }
 
     async function toggleSharedFileFavorite(idx, button) {
@@ -1440,11 +1801,11 @@
         `;
       }
 
-      document.getElementById('fileViewerModal').style.display = 'flex';
+      document.getElementById('fileViewerModal').classList.remove('hidden'); document.getElementById('fileViewerModal').classList.add('flex');
     }
 
     function fermerVisualiseur() {
-      document.getElementById('fileViewerModal').style.display = 'none';
+      document.getElementById('fileViewerModal').classList.add('hidden'); document.getElementById('fileViewerModal').classList.remove('flex');
       currentViewerFileIdx = null;
     }
 
@@ -1493,6 +1854,7 @@
       document.getElementById('filesCountBadge').textContent = `${storedFiles.length} fichier${storedFiles.length > 1 ? 's' : ''}`;
       if (currentViewerFileIdx === idx) fermerVisualiseur();
       afficherFichiers();
+      afficherTableauDeBord();
 
       const deleteTimer = setTimeout(async () => {
         pendingDeletions.delete(fileName);
@@ -1516,6 +1878,7 @@
           document.getElementById('sidebarFilesCount').textContent = storedFiles.length;
           document.getElementById('filesCountBadge').textContent = `${storedFiles.length} fichier${storedFiles.length > 1 ? 's' : ''}`;
           afficherFichiers();
+          afficherTableauDeBord();
           showToast('Suppression annulée', 'success');
         }
       });
@@ -1568,7 +1931,7 @@
       window.addEventListener('dragenter', (e) => {
         if (e.dataTransfer && e.dataTransfer.types && e.dataTransfer.types.includes('Files')) {
           dragCounter++;
-          globalOverlay.classList.add('active');
+          globalOverlay.classList.remove('hidden'); globalOverlay.classList.add('flex');
         }
       });
 
@@ -1576,7 +1939,7 @@
         dragCounter--;
         if (dragCounter <= 0) {
           dragCounter = 0;
-          globalOverlay.classList.remove('active');
+          globalOverlay.classList.add('hidden'); globalOverlay.classList.remove('flex');
         }
       });
 
@@ -1585,7 +1948,7 @@
       window.addEventListener('drop', (e) => {
         e.preventDefault();
         dragCounter = 0;
-        globalOverlay.classList.remove('active');
+        globalOverlay.classList.add('hidden'); globalOverlay.classList.remove('flex');
         if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
           // Si on n'est pas dans le textarea d'une note
           if (e.target.id !== 'noteContentTextarea') {
@@ -1642,7 +2005,7 @@
     function onFabClick() {
       if (activeMainTab === 'notes') {
         creerNouvelleNote();
-      } else {
+      } else if (activeMainTab === 'files') {
         document.getElementById('fileUploadInput').click();
       }
     }
@@ -1661,6 +2024,8 @@
        RACCOURCIS CLAVIER & INITIALISATION
        ========================================================================= */
     document.addEventListener('DOMContentLoaded', () => {
+      const themeToggle=document.getElementById('themeToggle'); if(themeToggle) themeToggle.addEventListener('click',cycleThemeMobile);
+      switchMainTab('dashboard');
       initDragAndDrop();
       initNoteDragAndDrop();
       initFloatingBubbleMenu();
@@ -1680,14 +2045,14 @@
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
           e.preventDefault();
           const overlay = document.getElementById('commandPaletteOverlay');
-          if (overlay.classList.contains('active')) fermerCommandPalette();
+          if (!overlay.classList.contains('hidden')) fermerCommandPalette();
           else ouvrirCommandPalette();
           return;
         }
 
         // 2. Navigation clavier dans la Command Palette
         const paletteOverlay = document.getElementById('commandPaletteOverlay');
-        if (paletteOverlay.classList.contains('active')) {
+        if (!paletteOverlay.classList.contains('hidden')) {
           if (e.key === 'ArrowDown') {
             e.preventDefault();
             commandPaletteSelectedIndex = Math.min(commandPaletteSelectedIndex + 1, commandPaletteItems.length - 1);
@@ -1708,7 +2073,7 @@
         // 3. Espace (Quick Look style macOS) pour les fichiers
         if (e.key === ' ' && !isEditingText) {
           const viewerModal = document.getElementById('fileViewerModal');
-          if (viewerModal.style.display === 'flex') {
+          if (!viewerModal.classList.contains('hidden')) {
             e.preventDefault();
             fermerVisualiseur();
           } else if (selectedFileIdx !== null && activeMainTab === 'files') {
